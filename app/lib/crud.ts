@@ -2,10 +2,10 @@
 import { fetchUserTransactions } from "./basiq";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { TablesInsert, TablesUpdate } from "@/types/supabase";
+import type { Database, TablesInsert, TablesUpdate } from "@/types/supabase";
 import type { ResolvedPromise } from "@/types/helpers";
 
-export async function fetchUserData(userID: string, supabase: SupabaseClient) {
+export async function fetchUserData(userID: string, supabase: SupabaseClient<Database>) {
     const { data, error } = await supabase
     .from('users')
     .select('*, points(*, stores(*)), rewards(*, reward_types(*)), transactions(*)')
@@ -113,6 +113,31 @@ export async function updateRewardRecord(record: TablesUpdate<'rewards'>, supaba
         console.log(`Error updating reward: `, error);
         throw new Error(`Error updating reward ${error}`);
     };
+}
+
+export async function redeemReward(
+    rewardID: string,
+    supabase: SupabaseClient
+) {
+    const { error } = await supabase.rpc('redeem_reward', { reward_id: rewardID });
+
+    if (error) {
+        throw new Error(`Error redeeming reward ${error}`);
+    }
+}
+
+export async function deductStoreBalance(
+    amount: number,
+    storeID: string,
+    userID: string,
+    supabase: SupabaseClient
+) {
+    const { error } = await supabase
+    .rpc('deduct_store_balance', { amount, store_id: storeID, user_id: userID });
+
+    if (error) {
+        throw new Error(`Error redeeming reward ${error}`);
+    }
 }
 
 export type UserData = NonNullable<ResolvedPromise<ReturnType<typeof fetchUserData>>>;

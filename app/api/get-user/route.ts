@@ -1,10 +1,9 @@
-import { refreshUserData } from '@/utils/functions/user';
+import { fetchUserData } from '@/lib/crud';
 import { createClient } from '@/utils/supabase/server';
 
 import { headers } from 'next/headers';
 
 export async function GET() {
-    // check for new transactions return updated user data
     const headersList = headers();
     const token = headersList.get('token');
 
@@ -22,7 +21,7 @@ export async function GET() {
         return Response.json({} , { status: 401 });
     }
 
-    const hasNewData = await refreshUserData(user.id, supabase);
+    const data = await fetchUserData(user.id, supabase);
 
-    return Response.json({ hasNewData });
+    return Response.json(data);
 }
