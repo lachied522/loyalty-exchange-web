@@ -4,6 +4,7 @@ import { redeemReward } from '@/utils/functions/user';
 import { headers } from 'next/headers';
 
 export async function GET(
+    req: Request,
     { params }: { params: { rewardID: string } }
 ) {
     const headersList = headers();
