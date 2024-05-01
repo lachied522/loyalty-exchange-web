@@ -29,7 +29,7 @@ export async function fetchUserData(userID: string, supabase: SupabaseClient<Dat
     };
 }
 
-export async function updateUserRecord(record: TablesUpdate<'users'>, userID: string, supabase: SupabaseClient) {
+export async function updateUserRecord(record: TablesUpdate<'users'>, userID: string, supabase: SupabaseClient<Database>) {
     const { data, error } = await supabase
     .from('users')
     .update(record)
@@ -44,7 +44,7 @@ export async function updateUserRecord(record: TablesUpdate<'users'>, userID: st
     return data;
 }
 
-export async function fetchStoresById(stores: string[], supabase: SupabaseClient) {
+export async function fetchStoresById(stores: string[], supabase: SupabaseClient<Database>) {
     const { data, error } = await supabase
     .from('stores')
     .select('*, reward_types(*)')
@@ -57,7 +57,7 @@ export async function fetchStoresById(stores: string[], supabase: SupabaseClient
     return data;
 }
 
-export async function fetchStoresByVendorName(vendorNames: string[], supabase: SupabaseClient) {
+export async function fetchStoresByVendorName(vendorNames: string[], supabase: SupabaseClient<Database>) {
     const { data, error } = await supabase
     .from('stores')
     .select('id, vendor_name, points_rate, reward_types(*)')
@@ -71,7 +71,10 @@ export async function fetchStoresByVendorName(vendorNames: string[], supabase: S
     return data;
 }
 
-export async function insertTransactions(records: TablesInsert<'transactions'>[], supabase: SupabaseClient) {
+export async function insertTransactions(
+    records: TablesInsert<'transactions'>[],
+    supabase: SupabaseClient<Database>
+) {
     const { error } = await supabase
     .from('transactions')
     .insert(records);
@@ -85,7 +88,7 @@ export async function insertTransactions(records: TablesInsert<'transactions'>[]
 export async function upsertPointsRecords(
     records: Omit<TablesInsert<'points'>, 'user_id'>[],
     userID: string,
-    supabase: SupabaseClient
+    supabase: SupabaseClient<Database>
 ) {
     // add user user id to records
     const newRecords = records.map((record) => ({ 
@@ -103,7 +106,28 @@ export async function upsertPointsRecords(
     };
 }
 
-export async function updateRewardRecord(record: TablesUpdate<'rewards'>, supabase: SupabaseClient) {
+export async function insertRewardRecords(
+    records: Omit<TablesInsert<'rewards'>, 'user_id'>[],
+    userID: string,
+    supabase: SupabaseClient<Database>
+) {
+    // add user user id to records
+    const newRecords = records.map((record) => ({ 
+        ...record,
+        user_id: userID
+    }));
+
+    const { error } = await supabase
+    .from('rewards')
+    .insert(newRecords);
+
+    if (error) {
+        console.log(`Error updating points balance: `, error);
+        throw new Error(`Error updating points balance ${error}`);
+    };
+}
+
+export async function updateRewardRecord(record: TablesUpdate<'rewards'>, supabase: SupabaseClient<Database>) {
     const { error } = await supabase
     .from('rewards')
     .update(record)

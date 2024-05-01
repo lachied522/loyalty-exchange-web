@@ -3,7 +3,10 @@ import { createClient } from '@/utils/supabase/server';
 
 import { headers } from 'next/headers';
 
-export async function GET() {
+export async function GET(
+    req: Request,
+    { params }: { params: { userID: string } }
+) {
     // check for new transactions return updated user data
     const headersList = headers();
     const token = headersList.get('token');
@@ -17,8 +20,7 @@ export async function GET() {
     // get user from token
     const { data: { user } } = await supabase.auth.getUser(token);
 
-    if (!user) {
-        // user not signed in
+    if (!(user && params.userID === user.id)) {
         return Response.json({} , { status: 401 });
     }
 

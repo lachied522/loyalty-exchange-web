@@ -4,6 +4,7 @@ import { createBasiqUser, getBasiqServerAccessToken, getClientTokenBoundToUser }
 import { headers } from 'next/headers';
 
 export async function GET(
+    req: Request,
     { params }: { params: { userID: string } }
 ) {
     // create a new Basiq access token and bind it to the user
