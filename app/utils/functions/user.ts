@@ -1,17 +1,16 @@
 import {
-    deductStoreBalance,
     fetchStoresByVendorName,
     fetchUserData,
     insertTransactions,
-    updateRewardRecord,
+    insertRewardRecord,
     updateUserRecord,
     upsertPointsRecords,
-    insertRewardRecords,
+    fetchUserStoreRecord,
 } from "@/lib/crud";
 
 import type { Transaction } from "@/lib/basiq";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, Tables, TablesInsert } from "@/types/supabase";
+import type { Database, Tables } from "@/types/supabase";
 import type { ResolvedPromise, Reward } from "@/types/helpers";
 
 
@@ -28,17 +27,17 @@ export async function createTransactionRecords(
 
         if (!store) return acc;
 
-        // calculate points
-        const points = Math.abs(parseFloat(obj.amount)) * store.points_rate;
+        const amount = parseFloat(obj.amount);
+        const points = Math.abs(amount) * store.points_rate;
 
         return [
             ...acc,
             {
-                amount: parseFloat(obj.amount),
+                amount,
+                points,
                 date: obj.postDate,
-                points: points,
+                user_id: userID,
                 store_id: store.id,
-                user_id: userID
             }
         ]
     }
@@ -64,43 +63,16 @@ export async function processNewTransactions(
 
     // initialise promises array
     const promises = [];
-    // initialise new points records
-    const newPointsRecords: Omit<TablesInsert<'points'>, 'user_id'>[] = [];
-    // initialise new rewards records
-    const newRewardsRecords: Omit<TablesInsert<'rewards'>, 'user_id'>[] = [];
-    // get ids of existing user rewards
-    const existingRewards = userData.rewards.map((reward) => reward.reward_types!.id);
-
-    Array.from(pointsMap).forEach(([store_id, balance]) => {
-        newPointsRecords.push({ balance, store_id });
-
-        const store = storeData.find((obj) => obj.id === store_id);
-
-        if (store) {
-            for (const reward_type of store.reward_types) {
-                if (balance > reward_type.cost && !existingRewards.includes(reward_type.id)) {
-                    newRewardsRecords.push({
-                        reward_id: reward_type.id,
-                        earned_at: new Date().toISOString(), // this should be the date of the transaction
-                    })
-                }
-            }
-        }
-    });
 
     // update points balance at each store
     promises.push(upsertPointsRecords(
-        newPointsRecords,
-        userData.id,
+        Array.from(pointsMap).map(([store_id, balance]) => ({
+            balance,
+            store_id,
+            user_id: userData.id,
+        })),
         supabase
     ));
-
-    // credit rewards for each store
-    promises.push(insertRewardRecords(
-        newRewardsRecords,
-        userData.id,
-        supabase
-    ))
 
     // insert records for new transactions
     promises.push(insertTransactions(newTransactions, supabase));
@@ -124,7 +96,10 @@ export async function processNewTransactions(
     });
 }
 
-export async function refreshUserData(userID: string, supabase: SupabaseClient<Database>) {
+export async function refreshUserData(
+    userID: string,
+    supabase: SupabaseClient<Database>
+) {
     const userData = await fetchUserData(userID, supabase);
 
     if (userData.newTransactions.length === 0) return false;
@@ -144,21 +119,39 @@ export async function redeemReward(
     userID: string,
     supabase: SupabaseClient<Database>
 ) {
-    // Step 1: set redeemed column to true
-    await updateRewardRecord(
+    // Step 1: check if user has sufficient points
+    const pointsRecord = await fetchUserStoreRecord(userID, reward.store_id, supabase);
+    const balance = pointsRecord?.balance || 0;
+
+    if (balance < reward.cost) {
+        return false;
+    }
+
+    const promises = [];
+    // Step 2: adjust user's points balance at store
+    promises.push(upsertPointsRecords(
+        [{
+            balance: balance - reward.cost,
+            store_id: reward.store_id,
+            user_id: userID,
+        }],
+        supabase
+    ));
+
+    // Step 3: insert new reward record
+    promises.push(insertRewardRecord(
         {
-            id: reward.id,
-            redeemed: true,
+            reward_id: reward.id,
+            user_id: userID,
             redeemed_at: new Date().toISOString(),
         },
         supabase
-    );
+    ));
 
-    // Step 2: adjust user's points balance at store
-    return await deductStoreBalance(
-        reward.reward_types!.cost,
-        reward.reward_types!.store_id,
-        userID,
-        supabase
-    )
+    return await Promise.all(promises)
+    .then(() => true)
+    .catch((e) => {
+        console.log('error redeeming reward:', e);
+        return false;
+    });
 }

@@ -27,15 +27,19 @@ export async function GET(
     const rewardID = params.rewardID;
     // fetch reward
     const { data: rewardData } = await supabase
-    .from('rewards')
-    .select('*, reward_types(*)')
+    .from('reward_types')
+    .select('*')
     .eq('id', rewardID);
 
     if (!rewardData) {
         return Response.json({}, { status: 404 });
     }
 
-    const data = await redeemReward(rewardData[0], user.id, supabase);
+    const isRedeemed = await redeemReward(rewardData[0], user.id, supabase);
 
-    return Response.json(data);
+    if (!isRedeemed) {
+        return Response.json({}, { status: 500 });
+    }
+
+    return Response.json({ isRedeemed }, { status: 200 });
 }

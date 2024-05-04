@@ -5,7 +5,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, TablesInsert, TablesUpdate } from "@/types/supabase";
 import type { ResolvedPromise } from "@/types/helpers";
 
-export async function fetchUserData(userID: string, supabase: SupabaseClient<Database>) {
+export async function fetchUserData(
+    userID: string,
+    supabase: SupabaseClient<Database>
+) {
     const { data, error } = await supabase
     .from('users')
     .select('*, points(*, stores(*, reward_types(*))), rewards(*, reward_types(*)), transactions(*)')
@@ -21,7 +24,7 @@ export async function fetchUserData(userID: string, supabase: SupabaseClient<Dat
 
     // filter out transactions based on time last updated
     const lastUpdated = new Date(data[0].last_updated);
-    const newTransactions = recentTransactions.filter((transaction) => new Date(transaction.postDate) > lastUpdated);
+    const newTransactions = recentTransactions.filter((transaction) => (new Date(transaction.postDate) > lastUpdated));
 
     return {
         ...data[0],
@@ -29,11 +32,34 @@ export async function fetchUserData(userID: string, supabase: SupabaseClient<Dat
     };
 }
 
-export async function updateUserRecord(record: TablesUpdate<'users'>, userID: string, supabase: SupabaseClient<Database>) {
+export async function fetchUserStoreRecord(
+    userID: string,
+    storeID: string,
+    supabase: SupabaseClient<Database>
+) {
+    const { data, error } = await supabase
+    .from('points')
+    .select('*')
+    .eq('user_id', userID)
+    .eq('store_id', storeID);
+
+    if (error) {
+        console.log(error);
+        throw new Error(`Error fecthing user data ${error}`);
+    };
+
+    return data? data[0]: null;
+}
+
+export async function updateUserRecord(
+    record: TablesUpdate<'users'>,
+    userID: string,
+    supabase: SupabaseClient<Database>
+) {
     const { data, error } = await supabase
     .from('users')
     .update(record)
-    .eq('id', userID) // TODO!
+    .eq('id', userID)
     .select('*, points(*), rewards(*), transactions(*)'); 
     
     if (error) {
@@ -44,7 +70,10 @@ export async function updateUserRecord(record: TablesUpdate<'users'>, userID: st
     return data;
 }
 
-export async function fetchStoresById(stores: string[], supabase: SupabaseClient<Database>) {
+export async function fetchStoresById(
+    stores: string[],
+    supabase: SupabaseClient<Database>
+) {
     const { data, error } = await supabase
     .from('stores')
     .select('*, reward_types(*)')
@@ -57,7 +86,10 @@ export async function fetchStoresById(stores: string[], supabase: SupabaseClient
     return data;
 }
 
-export async function fetchStoresByVendorName(vendorNames: string[], supabase: SupabaseClient<Database>) {
+export async function fetchStoresByVendorName(
+    vendorNames: string[],
+    supabase: SupabaseClient<Database>
+) {
     const { data, error } = await supabase
     .from('stores')
     .select('id, vendor_name, points_rate, reward_types(*)')
@@ -86,19 +118,12 @@ export async function insertTransactions(
 }
 
 export async function upsertPointsRecords(
-    records: Omit<TablesInsert<'points'>, 'user_id'>[],
-    userID: string,
+    records: TablesInsert<'points'>[],
     supabase: SupabaseClient<Database>
 ) {
-    // add user user id to records
-    const newRecords = records.map((record) => ({ 
-        ...record,
-        user_id: userID
-    }));
-
     const { error } = await supabase
     .from('points')
-    .upsert(newRecords, { onConflict: 'user_id, store_id' });
+    .upsert(records, { onConflict: 'user_id, store_id' });
 
     if (error) {
         console.log(`Error updating points balance: `, error);
@@ -106,51 +131,21 @@ export async function upsertPointsRecords(
     };
 }
 
-export async function insertRewardRecords(
-    records: Omit<TablesInsert<'rewards'>, 'user_id'>[],
-    userID: string,
+export async function insertRewardRecord(
+    record: TablesInsert<'rewards'>,
     supabase: SupabaseClient<Database>
 ) {
-    // add user user id to records
-    const newRecords = records.map((record) => ({ 
-        ...record,
-        user_id: userID
-    }));
-
     const { error } = await supabase
     .from('rewards')
-    .insert(newRecords);
-
-    if (error) {
-        console.log(`Error updating points balance: `, error);
-        throw new Error(`Error updating points balance ${error}`);
-    };
-}
-
-export async function updateRewardRecord(record: TablesUpdate<'rewards'>, supabase: SupabaseClient<Database>) {
-    const { error } = await supabase
-    .from('rewards')
-    .update(record)
-    .eq('id', record.id!);
+    .insert(record);
 
     if (error) {
         console.log(`Error updating reward: `, error);
-        throw new Error(`Error updating reward ${error}`);
+        throw new Error(`Error updating reward ${error.message}`);
     };
 }
 
-export async function redeemReward(
-    rewardID: string,
-    supabase: SupabaseClient
-) {
-    const { error } = await supabase.rpc('redeem_reward', { reward_id: rewardID });
-
-    if (error) {
-        throw new Error(`Error redeeming reward ${error}`);
-    }
-}
-
-export async function deductStoreBalance(
+export async function deductFromStorePoints(
     amount: number,
     storeID: string,
     userID: string,
@@ -160,7 +155,8 @@ export async function deductStoreBalance(
     .rpc('deduct_store_balance', { amount, store_id: storeID, user_id: userID });
 
     if (error) {
-        throw new Error(`Error redeeming reward ${error}`);
+        console.log(`Error deducting store balance:`, error);
+        throw new Error(`Error deducting store balance ${error.message}`);
     }
 }
 
