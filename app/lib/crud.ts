@@ -8,7 +8,7 @@ import type { ResolvedPromise } from "@/types/helpers";
 export async function fetchUserData(userID: string, supabase: SupabaseClient<Database>) {
     const { data, error } = await supabase
     .from('users')
-    .select('*, points(*, stores(*)), rewards(*, reward_types(*)), transactions(*)')
+    .select('*, points(*, stores(*, reward_types(*))), rewards(*, reward_types(*)), transactions(*)')
     .eq('id', userID);
 
     if (error) {
