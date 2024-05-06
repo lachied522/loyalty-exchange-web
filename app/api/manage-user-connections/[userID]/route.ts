@@ -16,8 +16,6 @@ export async function GET(
         return Response.json({} , { status: 401 });
     }
 
-    console.log(params);
-
     const supabase = createClient();
 
     // get user from token
@@ -31,7 +29,6 @@ export async function GET(
     const userData = await fetchUserData(user.id, supabase);
     let BasiqUserID;
     if (!userData.basiq_user_id) {
-
         // user has not been created yet
         if (!(user.email && user.user_metadata.mobile)) {
             return Response.json({ error: 'Could not create access token. User does not have valid email or mobile.' }, { status: 400 })

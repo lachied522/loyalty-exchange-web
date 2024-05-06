@@ -23,8 +23,13 @@ export async function fetchUserData(
     const recentTransactions = await fetchUserTransactions(data[0]['basiq_user_id'], 10);
 
     // filter out transactions based on time last updated
-    const lastUpdated = new Date(data[0].last_updated);
-    const newTransactions = recentTransactions.filter((transaction) => (new Date(transaction.postDate) > lastUpdated));
+    const lastUpdated = data[0].last_updated? new Date(data[0].last_updated): null;
+    let newTransactions;
+    if (lastUpdated) {
+        newTransactions = recentTransactions.filter((transaction) => (new Date(transaction.postDate) > lastUpdated));
+    } else {
+        newTransactions = recentTransactions;
+    }
 
     return {
         ...data[0],

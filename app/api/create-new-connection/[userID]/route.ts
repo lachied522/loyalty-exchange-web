@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { createBasiqUser, getBasiqServerAccessToken, getClientTokenBoundToUser } from '@/lib/basiq';
+import { createBasiqUser, getClientTokenBoundToUser } from '@/lib/basiq';
 
 import { headers } from 'next/headers';
 

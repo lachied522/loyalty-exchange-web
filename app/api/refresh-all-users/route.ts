@@ -20,7 +20,8 @@ export async function GET() {
     const hour = 1000 * 60 * 60;
     const queue: Promise<boolean>[] = [];
     for (const user of data) {
-        if (new Date(user.last_updated).getTime() > now - hour) {
+        const lastUpdated = user.last_updated? new Date(user.last_updated): null;
+        if (!lastUpdated || lastUpdated.getTime() > now - hour) {
 
             if (queue.length > 10) {
                 await queue[0];

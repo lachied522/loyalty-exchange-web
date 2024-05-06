@@ -129,24 +129,28 @@ export async function redeemReward(
 
     const promises = [];
     // Step 2: adjust user's points balance at store
-    promises.push(upsertPointsRecords(
-        [{
-            balance: balance - reward.cost,
-            store_id: reward.store_id,
-            user_id: userID,
-        }],
-        supabase
-    ));
+    promises.push(
+        upsertPointsRecords(
+            [{
+                balance: balance - reward.cost,
+                store_id: reward.store_id,
+                user_id: userID,
+            }],
+            supabase
+        )
+    );
 
     // Step 3: insert new reward record
-    promises.push(insertRewardRecord(
-        {
-            reward_id: reward.id,
-            user_id: userID,
-            redeemed_at: new Date().toISOString(),
-        },
-        supabase
-    ));
+    promises.push(
+        insertRewardRecord(
+            {
+                reward_type_id: reward.id,
+                user_id: userID,
+                redeemed_at: new Date().toISOString(),
+            },
+            supabase
+        )
+    );
 
     return await Promise.all(promises)
     .then(() => true)
