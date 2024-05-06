@@ -29,7 +29,7 @@ export default function DeleteAccountPage() {
 
             setUser(data.user);
         }
-    }, []);
+    }, [router, user, supabase.auth]);
 
     const onDelete = async () => {
         if (!user) return;
