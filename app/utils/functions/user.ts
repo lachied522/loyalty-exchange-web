@@ -65,28 +65,32 @@ export async function processNewTransactions(
     const promises = [];
 
     // update points balance at each store
-    promises.push(upsertPointsRecords(
-        Array.from(pointsMap).map(([store_id, balance]) => ({
-            balance,
-            store_id,
-            user_id: userData.id,
-        })),
-        supabase
-    ));
+    promises.push(
+        upsertPointsRecords(
+            Array.from(pointsMap).map(([store_id, balance]) => ({
+                balance,
+                store_id,
+                user_id: userData.id,
+            })),
+            supabase
+        )
+);
 
     // insert records for new transactions
     promises.push(insertTransactions(newTransactions, supabase));
 
     // update user points balance and last_updated columns
     const POINTS_CONVERSION_RATE = 10;
-    promises.push(updateUserRecord(
-        {
-            points_balance: userData.points_balance + totalSpend * POINTS_CONVERSION_RATE,
-            last_updated: new Date().toISOString(),
-        },
-        userData.id,
-        supabase
-    ));
+    promises.push(
+        updateUserRecord(
+            {
+                points_balance: userData.points_balance + totalSpend * POINTS_CONVERSION_RATE,
+                last_updated: new Date().toISOString(),
+            },
+            userData.id,
+            supabase
+        )
+    );
 
     return await Promise.all(promises)
     .then(() => true)

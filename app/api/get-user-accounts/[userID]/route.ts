@@ -2,32 +2,23 @@ import { createClient } from '@/utils/supabase/server';
 import { fetchUserAccounts } from '@/lib/basiq';
 import { fetchUserData } from '@/lib/crud';
 
-import { headers } from 'next/headers';
+import { isRequestAuthenticated } from '@/api/auth';
 
 export async function GET(
     req: Request,
     { params }: { params: { userID: string } }
 ) {
     // create a new Basiq access token and bind it to the user
-    const headersList = headers();
-    const token = headersList.get('token');
+    const isAuthenticated = await isRequestAuthenticated(params.userID);
 
-    if (!token) {
-        return Response.json({} , { status: 401 });
+    if (!isAuthenticated) {
+        return Response.json({} , { status: 401 })
     }
 
     const supabase = createClient();
 
-    // get user from token
-    const { data: { user } } = await supabase.auth.getUser(token);
-
-    // check that userID belongs to user with token
-    if (!(user && params.userID === user.id)) {
-        return Response.json({} , { status: 401 });
-    }
-
     // get user record
-    const userData = await fetchUserData(user.id, supabase);
+    const userData = await fetchUserData(params.userID, supabase);
 
     // fetch user account
     const data = await fetchUserAccounts(userData.basiq_user_id);

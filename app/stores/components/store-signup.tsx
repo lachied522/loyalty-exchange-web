@@ -39,7 +39,6 @@ export default function StoreSignup() {
         },
     });
 
-
     const onSubmit = (values: z.infer<typeof formSchema>) => {
         setIsSubmitted(true);
 
