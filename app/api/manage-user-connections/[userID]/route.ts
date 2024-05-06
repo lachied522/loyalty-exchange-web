@@ -16,8 +16,6 @@ export async function GET(
         return Response.json({} , { status: 401 });
     }
 
-    console.log(params);
-
     const supabase = createClient();
 
     // get user from token
