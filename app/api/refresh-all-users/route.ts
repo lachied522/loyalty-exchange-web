@@ -31,5 +31,11 @@ export async function GET() {
         }
     }
 
+    await Promise.all(queue)
+    .catch((e) => {
+        console.log('Error refresing user data: ', e);
+    });
+
+    console.log('User data refreshed.');
     return Response.json({}, { status: 200 });
 }
