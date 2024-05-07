@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 
+import emailjs from '@emailjs/browser';
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod"
@@ -12,7 +14,6 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,26 @@ import { Input } from "@/components/ui/input";
 const formSchema = z.object({
     name: z.string(),
     email: z.string(),
-})
+});
+
+function sendEmail(values: {
+    name: string,
+    email: string
+}) {
+    emailjs.send(
+        'service_icsdf96',
+        'template_o64av9m',
+        {
+            ...values
+        },
+        {
+            publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
+        }
+    )
+    .catch((e) => {
+        console.log('error sending form: ', e);
+    })
+}
 
 export default function Waitlist() {
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
@@ -36,6 +56,8 @@ export default function Waitlist() {
 
     const onSubmit = (values: z.infer<typeof formSchema>) => {
         setIsSubmitted(true);
+
+        sendEmail(values);
     }
 
     return (
@@ -47,10 +69,10 @@ export default function Waitlist() {
                 <FormField
                     control={form.control}
                     name="name"
-                    render={() => (
+                    render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input placeholder="Your name"/>
+                            <Input placeholder="Your name" {...field} />
                         </FormControl>
                         <FormDescription />
                         <FormMessage />
@@ -60,10 +82,10 @@ export default function Waitlist() {
                 <FormField
                     control={form.control}
                     name="email"
-                    render={() => (
+                    render={({ field }) => (
                     <FormItem>
                         <FormControl>
-                            <Input placeholder="Your email"/>
+                            <Input placeholder="Your email" {...field} />
                         </FormControl>
                         <FormDescription />
                         <FormMessage />
