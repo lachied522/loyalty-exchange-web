@@ -1,8 +1,16 @@
+// docs: https://vercel.com/docs/cron-jobs/manage-cron-jobs
+
 import { refreshUserData } from '@/utils/functions/user';
 import { createClient } from '@/utils/supabase/server';
 
-export async function GET() {
-    // TO DO: add way to identify caller of this route to prevent unathorised access
+export async function GET(req: Request) {
+
+    if (req.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+        return new Response('Unauthorized', {
+            status: 401,
+        });
+    }
+
     const supabase = createClient();
 
     // get all user records
