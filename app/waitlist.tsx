@@ -64,7 +64,7 @@ export default function Waitlist() {
         <Form {...form}>
             <form 
                 onSubmit={form.handleSubmit(onSubmit)}
-                className='w-[360px] flex flex-col items-stretch gap-2'
+                className='md:w-[360px] w-[240px] flex flex-col items-stretch gap-2'
             >
                 <FormField
                     control={form.control}
