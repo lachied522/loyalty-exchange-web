@@ -89,15 +89,23 @@ export async function fetchUserTransactions(
 
     // get last 10 transactions
     // it is possible user makes more than 10 transactions before we can update their point counts
-    return fetch(`https://au-api.basiq.io/users/${BasiqUserId}/transactions?limit=${limit}`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${serverAccessToken}`,
-            'Accept': 'application/json',
+    const res = await fetch(
+        `https://au-api.basiq.io/users/${BasiqUserId}/transactions?limit=${limit}`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${serverAccessToken}`,
+                'Accept': 'application/json',
+            }
         }
-    })
-    .then((res) => res.json())
-    .then((res) => res.data);
+    );
+
+    if (!res.ok) {
+        console.log('error fetching user transactions, status: ', res.status);
+        return [];
+    }
+
+    return await res.json().then(({ data }) => data);
 }
 
 export async function fetchUserAccounts(
@@ -107,13 +115,21 @@ export async function fetchUserAccounts(
 
     const serverAccessToken = await getBasiqServerAccessToken();
 
-    return fetch(`https://au-api.basiq.io/users/${BasiqUserId}/accounts`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${serverAccessToken}`,
-            'Accept': 'application/json',
+    const res = await fetch(
+        `https://au-api.basiq.io/users/${BasiqUserId}/accounts`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${serverAccessToken}`,
+                'Accept': 'application/json',
+            }
         }
-    })
-    .then((res) => res.json())
-    .then((res) => res.data);
+    );
+
+    if (!res.ok) {
+        console.log('error fetching user accounts, status: ', res.status);
+        return [];
+    }
+
+    return await res.json().then(({ data }) => data);
 }
