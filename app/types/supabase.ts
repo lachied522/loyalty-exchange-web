@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       clients: {
         Row: {
+          auth_user_id: string | null
           created_at: string
           email: string | null
           id: string
@@ -18,6 +19,7 @@ export type Database = {
           stripe_customer_id: string | null
         }
         Insert: {
+          auth_user_id?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -25,13 +27,22 @@ export type Database = {
           stripe_customer_id?: string | null
         }
         Update: {
+          auth_user_id?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name?: string | null
           stripe_customer_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clients_auth_user_id_fkey"
+            columns: ["auth_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       points: {
         Row: {
@@ -142,7 +153,7 @@ export type Database = {
           created_at: string
           id: string
           image_urls: string[]
-          name: string | null
+          name: string
           points_rate: number
           postcode: string | null
           state: string | null
@@ -155,7 +166,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_urls?: string[]
-          name?: string | null
+          name: string
           points_rate?: number
           postcode?: string | null
           state?: string | null
@@ -168,7 +179,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_urls?: string[]
-          name?: string | null
+          name?: string
           points_rate?: number
           postcode?: string | null
           state?: string | null
@@ -231,18 +242,21 @@ export type Database = {
           basiq_user_id: string | null
           id: string
           last_updated: string | null
+          name: string | null
           points_balance: number
         }
         Insert: {
           basiq_user_id?: string | null
           id: string
           last_updated?: string | null
+          name?: string | null
           points_balance?: number
         }
         Update: {
           basiq_user_id?: string | null
           id?: string
           last_updated?: string | null
+          name?: string | null
           points_balance?: number
         }
         Relationships: [

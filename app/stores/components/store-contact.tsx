@@ -49,7 +49,7 @@ function sendEmail(values : {
     })
 }
 
-export default function StoreSignup() {
+export default function StoreContact() {
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
     const form = useForm<z.infer<typeof formSchema>>({

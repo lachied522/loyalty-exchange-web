@@ -1,9 +1,8 @@
 import Logo from "@/logo";
 
-import StoreSignup from "./components/store-signup";
+import StoreContact from "./components/store-contact";
 
 export default function StorePage() {
-
 
     return (
         <main className=''>
@@ -27,7 +26,7 @@ export default function StorePage() {
 
             <div className='flex flex-col items-center gap-12 sm:p-24 p-12'>
                 <h1 className='sm:text-4xl text-3xl font-semibold'>Join our store network</h1>
-                <StoreSignup />
+                <StoreContact />
             </div>
 
         </main>

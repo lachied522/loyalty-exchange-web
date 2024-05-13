@@ -33,7 +33,7 @@ export async function getBasiqServerAccessToken(): Promise<string> {
     return fetch('https://au-api.basiq.io/token', {
         method: 'POST',
         headers: {
-            'Authorization': `Basic ${process.env.NEXT_PUBLIC_BASIQ_API_KEY}`, 
+            'Authorization': `Basic ${process.env.BASIQ_API_KEY}`, 
             'Content-Type': 'application/x-www-form-urlencoded', 
             'basiq-version': '3.0'
         },
@@ -69,7 +69,7 @@ export async function getClientTokenBoundToUser(
     return fetch('https://au-api.basiq.io/token', {
         method: 'POST',
         headers: {
-            'Authorization': `Basic ${process.env.NEXT_PUBLIC_BASIQ_API_KEY}`, 
+            'Authorization': `Basic ${process.env.BASIQ_API_KEY}`, 
             'Content-Type': 'application/x-www-form-urlencoded', 
             'basiq-version': '3.0'
         },
