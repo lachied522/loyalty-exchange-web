@@ -2,8 +2,6 @@ import { isRequestAuthenticated } from '@/api/auth';
 import { refreshUserData } from '@/utils/functions/user';
 import { createClient } from '@/utils/supabase/server';
 
-import { headers } from 'next/headers';
-
 export async function GET(
     req: Request,
     { params }: { params: { userID: string } }
@@ -16,7 +14,15 @@ export async function GET(
     }
 
     const supabase = createClient();
-    const hasNewData = await refreshUserData(params.userID, supabase);
 
-    return Response.json({ hasNewData });
+    try {
+        const hasNewData = await refreshUserData(params.userID, supabase);
+
+        return Response.json({ hasNewData });
+    } catch (error) {
+        console.log('error in refresh user route: ', error);
+
+        return Response.json({ error }, { status: 500 });
+    }
+
 }

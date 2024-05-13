@@ -21,7 +21,13 @@ export async function GET(
     const userData = await fetchUserData(params.userID, supabase);
 
     // fetch user account
-    const data = await fetchUserAccounts(userData.basiq_user_id);
+    try {
+        const data = await fetchUserAccounts(userData.basiq_user_id);
+        
+        return Response.json({ data }, { status: 200 });
+    } catch (error) {
+        console.log('error in get user accounts route: ', error)
+        return Response.json({ error }, { status: 500 });
+    }
 
-    return Response.json({ data }, { status: 200 });
 }

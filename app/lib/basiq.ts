@@ -30,17 +30,25 @@ export type Account = {
 }
 
 export async function getBasiqServerAccessToken(): Promise<string> {
-    return fetch('https://au-api.basiq.io/token', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Basic ${process.env.BASIQ_API_KEY}`, 
-            'Content-Type': 'application/x-www-form-urlencoded', 
-            'basiq-version': '3.0'
-        },
-        body: JSON.stringify({ scope: 'SERVER_ACCESS' }),
-    })
-    .then((res) => res.json())
-    .then((res) => res['access_token']);
+    const res = await fetch(
+        'https://au-api.basiq.io/token',
+        {
+            method: 'POST',
+            headers: {
+                'Authorization': `Basic ${process.env.BASIQ_API_KEY}`, 
+                'Content-Type': 'application/x-www-form-urlencoded', 
+                'basiq-version': '3.0'
+            },
+            body: JSON.stringify({ scope: 'SERVER_ACCESS' }),
+        }
+    );
+
+    if (!res.ok) {
+        console.log('Error fetching Basiq server access token, status: ', res.status);
+        throw new Error('Error fetching Basiq server access token.')
+    }
+
+    return await res.json().then(({ access_token }) => access_token);
 }
 
 export async function createBasiqUser(
@@ -49,34 +57,51 @@ export async function createBasiqUser(
 ): Promise<string> {
     const serverAccessToken = await getBasiqServerAccessToken();
 
-    return fetch('https://au-api.basiq.io/users', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${serverAccessToken}`,
-            'Content-Type': 'application/json', 
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({ email, mobile }),
-    })
-    .then((res) => res.json())
-    .then((res) => res['id']);
+    const res = await fetch(
+        'https://au-api.basiq.io/users',
+        {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${serverAccessToken}`,
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ email, mobile }),
+        }
+    );
+
+    if (!res.ok) {
+        console.log('Error creating Basiq user, status: ', res.status);
+        throw new Error('Error creating Basiq user.')
+    }
+
+    return await res.json().then(({ id }) => id);
 }
 
 // see docs at https://api.basiq.io/docs/quickstart-api
 export async function getClientTokenBoundToUser(
     BasiqUserId: string
 ): Promise<string> {
-    return fetch('https://au-api.basiq.io/token', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Basic ${process.env.BASIQ_API_KEY}`, 
-            'Content-Type': 'application/x-www-form-urlencoded', 
-            'basiq-version': '3.0'
-        },
-        body: JSON.stringify({ scope: 'CLIENT_ACCESS', userId: BasiqUserId }),
-    })
-    .then((res) => res.json())
-    .then((res) => res['access_token']);
+
+    const res = await fetch(
+        'https://au-api.basiq.io/token',
+        {
+            method: 'POST',
+            headers: {
+                'Authorization': `Basic ${process.env.BASIQ_API_KEY}`, 
+                'Content-Type': 'application/x-www-form-urlencoded', 
+                'basiq-version': '3.0'
+            },
+            body: JSON.stringify({ scope: 'CLIENT_ACCESS', userId: BasiqUserId }),
+        }
+    );
+
+    if (!res.ok) {
+        console.log('Error binding client token to user, status: ', res.status);
+        throw new Error('Error binding client token to user.')
+    }
+
+    return await res.json().then(({ access_token }) => access_token);
 }
 
 export async function fetchUserTransactions(
@@ -102,7 +127,7 @@ export async function fetchUserTransactions(
 
     if (!res.ok) {
         console.log('error fetching user transactions, status: ', res.status);
-        return [];
+        throw new Error('Error fetching user transactions.');
     }
 
     return await res.json().then(({ data }) => data);
@@ -128,7 +153,7 @@ export async function fetchUserAccounts(
 
     if (!res.ok) {
         console.log('error fetching user accounts, status: ', res.status);
-        return [];
+        throw new Error('Error fetching user accounts.');
     }
 
     return await res.json().then(({ data }) => data);
