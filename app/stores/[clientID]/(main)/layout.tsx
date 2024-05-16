@@ -4,11 +4,13 @@ import Sidebar from "./components/sidebar";
 export default function ClientIDMainLayout({ children } : { children: React.ReactNode }) {
 
     return (
-        <main className='flex items-start bg-neutral-100'>
+        <main className='h-screen flex items-start bg-neutral-100'>
             <Sidebar />
-            <div className='flex-1'>
+            <div className='flex-1 ml-32'>
                 <Header />
-                {children}
+                <div className='container'>
+                    {children}
+                </div>
             </div>
         </main>
     )

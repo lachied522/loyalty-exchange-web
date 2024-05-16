@@ -32,5 +32,4 @@ export async function createCheckoutSession(
       client_secret: checkoutSession.client_secret,
       url: checkoutSession.url,
     };
-  }
-  
+}

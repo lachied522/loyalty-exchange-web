@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useState } from "react";
 
-import type { ClientData } from "@/types/helpers";
+import type { ClientData } from "@/utils/functions/clients";
 
 export type ClientState = {
     clientData: ClientData

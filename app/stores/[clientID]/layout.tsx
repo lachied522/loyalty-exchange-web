@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { createClient } from "@/utils/supabase/server";
+import { fetchClientData } from "@/utils/functions/clients";
 
 import ClientContextProvider from "./context/ClientContext";
 
@@ -10,19 +10,15 @@ interface ClientIDLayoutProps {
 }
 
 export default async function ClientIDLayout({ children, params } : ClientIDLayoutProps) {
-    const supabase = createClient();
 
-    const { data, error } = await supabase
-    .from('clients')
-    .select('*, stores(*)')
-    .eq('id', params.clientID);
+    const data = await fetchClientData(params.clientID);
 
     if (!data) {
         notFound();
     }
 
     return (
-        <ClientContextProvider initialState={data[0]}>
+        <ClientContextProvider initialState={data}>
             {children}
         </ClientContextProvider>
     )

@@ -82,6 +82,8 @@ export type Database = {
           cost: number
           icon_name: string | null
           id: string
+          promo_code: string | null
+          reward_type: Database["public"]["Enums"]["reward_type"] | null
           store_id: string
           title: string
         }
@@ -89,6 +91,8 @@ export type Database = {
           cost?: number
           icon_name?: string | null
           id?: string
+          promo_code?: string | null
+          reward_type?: Database["public"]["Enums"]["reward_type"] | null
           store_id: string
           title: string
         }
@@ -96,6 +100,8 @@ export type Database = {
           cost?: number
           icon_name?: string | null
           id?: string
+          promo_code?: string | null
+          reward_type?: Database["public"]["Enums"]["reward_type"] | null
           store_id?: string
           title?: string
         }
@@ -152,11 +158,12 @@ export type Database = {
           client_id: string
           created_at: string
           id: string
-          image_urls: string[]
           name: string
           points_rate: number
           postcode: string | null
           state: string | null
+          store_img_url: string | null
+          store_logo_url: string | null
           vendor_name: string
         }
         Insert: {
@@ -165,11 +172,12 @@ export type Database = {
           client_id: string
           created_at?: string
           id?: string
-          image_urls?: string[]
           name: string
           points_rate?: number
           postcode?: string | null
           state?: string | null
+          store_img_url?: string | null
+          store_logo_url?: string | null
           vendor_name: string
         }
         Update: {
@@ -178,11 +186,12 @@ export type Database = {
           client_id?: string
           created_at?: string
           id?: string
-          image_urls?: string[]
           name?: string
           points_rate?: number
           postcode?: string | null
           state?: string | null
+          store_img_url?: string | null
+          store_logo_url?: string | null
           vendor_name?: string
         }
         Relationships: [
@@ -277,7 +286,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      reward_type: "free_item" | "discount" | "promo_code"
     }
     CompositeTypes: {
       [_ in never]: never

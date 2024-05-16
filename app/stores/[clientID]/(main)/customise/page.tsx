@@ -1,6 +1,7 @@
-import RecentTransactions from "./components/recent-transactions";
-import TopCustomers from "./components/top-customers";
 import StoreSelector from "./components/store-selector";
+import StoreLogo from "./components/store-logo";
+import StoreImage from "./components/store-image";
+import StoreRewards from "./components/store-rewards";
 
 export default function ClientIDDashboard() {
 
@@ -10,9 +11,12 @@ export default function ClientIDDashboard() {
                 <div className='col-span-1 xl:col-span-2 flex flex-row justify-end'>
                     <StoreSelector />
                 </div>
+                <StoreLogo />
+                <StoreImage />
                 
-                <TopCustomers />
-                <RecentTransactions />
+                <div className='xl:col-span-2'>
+                    <StoreRewards />
+                </div>
             </div>
         </div>
     )

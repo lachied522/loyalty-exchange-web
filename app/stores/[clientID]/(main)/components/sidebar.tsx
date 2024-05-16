@@ -2,7 +2,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-import { Home, Cog } from 'lucide-react';
+import { Home, Cog, Receipt } from 'lucide-react';
 
 import { cn } from "@/components/lib";
 
@@ -16,9 +16,9 @@ export default function Sidebar() {
     const pathname = usePathname();
 
     return (
-        <aside className='h-screen flex flex-col items-center py-5 bg-white shadow-md'>
+        <aside className='z-10 h-screen w-32 flex flex-col items-center py-5 bg-white shadow-md fixed'>
             <Logo withText={false} />
-            <nav className='flex flex-col gap-4 px-5 py-6 cursor-pointer'>
+            <nav className='flex flex-col gap-12 px-5 py-6 cursor-pointer'>
                 <Link
                     href={`/stores/${clientData.id}/dashboard`}
                     className={cn(
@@ -28,6 +28,17 @@ export default function Sidebar() {
                 >
                     <Home />
                     <div className='font-semibold text-xs'>Dashboard</div>
+                </Link>
+
+                <Link
+                    href={`/stores/${clientData.id}/customise`}
+                    className={cn(
+                        'grid grid-cols-[25px,1fr] items-center justify-start gap-1.5',
+                        pathname.endsWith('/customise') && 'text-yellow-400'
+                    )}
+                >
+                    <Receipt />
+                    <div className='font-semibold text-xs'>Customise</div>
                 </Link>
 
                 <Link
