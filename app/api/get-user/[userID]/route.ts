@@ -1,5 +1,5 @@
 import { isRequestAuthenticated } from '@/api/auth';
-import { fetchUserData } from '@/lib/crud';
+import { fetchAllUserData } from '@/utils/crud/users';
 import { createClient } from '@/utils/supabase/server';
 
 export async function GET(
@@ -15,7 +15,7 @@ export async function GET(
     const supabase = createClient();
 
     try {
-        const data = await fetchUserData(params.userID, supabase);
+        const data = await fetchAllUserData(params.userID, supabase);
 
         return Response.json(data);
     } catch (error) {

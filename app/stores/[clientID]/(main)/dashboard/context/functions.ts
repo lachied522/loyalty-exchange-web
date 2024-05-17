@@ -7,10 +7,10 @@ export async function fetchCustomersByStoreID(storeID: string) {
 
     const { data, error } = await supabase
     .from("points")
-    .select("*, users(id, name, transactions(*), rewards(*, reward_types(*)))")
+    .select("*, users(id, name, transactions(*), redeemed(*, rewards(*)))")
     .eq("store_id", storeID)
     .eq("users.transactions.store_id", storeID)
-    .eq("users.rewards.reward_types.store_id", storeID);
+    .eq("users.redeemed.rewards.store_id", storeID);
 
     if (error) {
         console.log(error);

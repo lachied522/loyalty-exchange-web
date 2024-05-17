@@ -1,62 +1,119 @@
 import {
-    fetchStoresByVendorName,
-    fetchUserData,
+    fetchUserPointsRecordByStoreID,
+    fetchUserRecord,
     insertTransactions,
-    insertRewardRecord,
     updateUserRecord,
     upsertPointsRecords,
-    fetchUserStoreRecord,
-} from "@/lib/crud";
+} from "../crud/users";
+import { fetchStoresByVendorName } from "../crud/stores";
 
-import type { Transaction } from "@/lib/basiq";
+import { fetchTransactionsByUserID } from "../basiq/transactions";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Tables } from "@/types/supabase";
-import type { ResolvedPromise, Reward } from "@/types/helpers";
+import type { Transaction } from "@/types/basiq";
 
+import type { ResolvedPromise } from "@/types/helpers";
+
+const GLOBAL_POINTS_RATE = 10;
+
+export async function updateUserLastUpdated(
+    userID: string,
+    supabase: SupabaseClient<Database>
+) {
+    // update the 'last_updated' column in user record
+    return await updateUserRecord(
+        { last_updated: new Date().toISOString() },
+        userID,
+        supabase
+    )
+}
+
+export async function getNewTransactionsByUserID(
+    userID: string,
+    supabase: SupabaseClient<Database>,
+    serverAccessToken?: string
+) {
+    try {
+        const user = await fetchUserRecord(userID, supabase);
+
+        // fetch transactions data from Basiq
+        const recentTransactions = await fetchTransactionsByUserID(user.basiq_user_id, 10, serverAccessToken);
+
+        // filter out transactions based on time last updated
+        const lastUpdated = user.last_updated? new Date(user.last_updated): null;
+        let newTransactions;
+        if (lastUpdated) {
+            newTransactions = recentTransactions.filter(
+                (transaction) => (
+                    new Date(transaction.transactionDate || transaction.postDate) > lastUpdated
+                )
+            );
+        } else {
+            newTransactions = recentTransactions;
+        }
+
+        return newTransactions;
+    } catch (e) {
+        console.log(`Error getting new transactions for user ${userID}: `, e);
+        return [];
+    }
+}
 
 export async function createTransactionRecords(
-    transactions: Transaction[],
-    storeData: ResolvedPromise<ReturnType<typeof fetchStoresByVendorName>>,
     userID: string,
+    newTransactions: Transaction[],
+    supabase: SupabaseClient<Database>,
 ) {
-    // create new transaction  records by merging transactions from Basiq api with store data and user ID
-    if (transactions.length === 0) return [];
-    
+    // create new transaction records by merging transactions from Basiq api with store data and user ID
+    if (newTransactions.length === 0) return [];
+
+    // get stores where vendor name matches transaction description
+    const storeData = await fetchStoresByVendorName(
+        newTransactions.map((transaction) => transaction.description.toUpperCase()),
+        supabase
+    );
+
     function reducer(acc: Omit<Tables<'transactions'>, 'id'>[], obj: Transaction) {
         const store = storeData.find((store) => store.vendor_name === obj.description);
 
         if (!store) return acc;
 
         const amount = parseFloat(obj.amount);
-        const points = Math.abs(amount) * store.points_rate;
+        const points = amount * GLOBAL_POINTS_RATE;
 
         return [
             ...acc,
             {
                 amount,
                 points,
-                date: obj.postDate,
+                date: obj.transactionDate,
                 user_id: userID,
                 store_id: store.id,
             }
         ]
     }
 
-    return transactions.reduce(reducer, []);
+    return newTransactions.reduce(reducer, []);
 }
 
 export async function processNewTransactions(
+    userID: string,
     newTransactions: ResolvedPromise<ReturnType<typeof createTransactionRecords>>,
-    userData: ResolvedPromise<ReturnType<typeof fetchUserData>>,
-    storeData: ResolvedPromise<ReturnType<typeof fetchStoresByVendorName>>,
     supabase: SupabaseClient<Database>,
 ) {
     // calculate new points balance for each store
     let totalSpend = 0;
-    const pointsMap = new Map<string, number>();
+    const pointsMap = new Map<string, number>(); // { store_id: balance } for each transaction
     for (const transaction of newTransactions) {
-        const currentBalance = userData.points.find((obj) => transaction.store_id === obj.store_id)?.balance || 0;
-        pointsMap.set(transaction.store_id, currentBalance + transaction.points! + (pointsMap.get(transaction.store_id) || 0));
+        if (!pointsMap.has(transaction.store_id)) {
+            // initialise points balance to current balance if any
+            const userPointsRecord = await fetchUserPointsRecordByStoreID(userID, transaction.store_id, supabase);
+            
+            pointsMap.set(transaction.store_id, userPointsRecord?.balance || 0);
+        }
+
+        pointsMap.set(transaction.store_id, transaction.points + pointsMap.get(transaction.store_id)!);
 
         totalSpend += Math.abs(transaction.amount!);
     }
@@ -70,7 +127,7 @@ export async function processNewTransactions(
             Array.from(pointsMap).map(([store_id, balance]) => ({
                 balance,
                 store_id,
-                user_id: userData.id,
+                user_id: userID,
             })),
             supabase
         )
@@ -79,15 +136,10 @@ export async function processNewTransactions(
     // insert records for new transactions
     promises.push(insertTransactions(newTransactions, supabase));
 
-    // update user points balance and last_updated columns
-    const POINTS_CONVERSION_RATE = 10;
+    // update user last_updated column
     promises.push(
-        updateUserRecord(
-            {
-                points_balance: userData.points_balance + totalSpend * POINTS_CONVERSION_RATE,
-                last_updated: new Date().toISOString(),
-            },
-            userData.id,
+        updateUserLastUpdated(
+            userID,
             supabase
         )
     );
@@ -102,64 +154,24 @@ export async function processNewTransactions(
 
 export async function refreshUserData(
     userID: string,
-    supabase: SupabaseClient<Database>
+    supabase: SupabaseClient<Database>,
+    serverAccessToken?: string,
 ) {
-    const userData = await fetchUserData(userID, supabase);
+    try {
+        const newTransactions = await getNewTransactionsByUserID(userID, supabase, serverAccessToken);
 
-    if (userData.newTransactions.length === 0) return false;
-
-    const storeData = await fetchStoresByVendorName(
-        userData.newTransactions.map((transaction) => transaction.description.toUpperCase()),
-        supabase
-    );
-
-    const newTransactions = await createTransactionRecords(userData.newTransactions, storeData, userData.id);
+        if (newTransactions.length === 0) {
+            // update last_updated column and return false
+            await updateUserLastUpdated(userID, supabase);
+            return false;
+        };
     
-    return await processNewTransactions(newTransactions, userData, storeData, supabase);
-}
-
-export async function redeemReward(
-    reward: Reward,
-    userID: string,
-    supabase: SupabaseClient<Database>
-) {
-    // Step 1: check if user has sufficient points
-    const pointsRecord = await fetchUserStoreRecord(userID, reward.store_id, supabase);
-    const balance = pointsRecord?.balance || 0;
-
-    if (balance < reward.cost) {
+        const newTransactionsRecords = await createTransactionRecords(userID, newTransactions, supabase);
+        
+        return await processNewTransactions(userID, newTransactionsRecords, supabase);
+    } catch (e) {
+        console.log(`Error refreshing data for user ${userID}: `, e);
         return false;
     }
-
-    const promises = [];
-    // Step 2: adjust user's points balance at store
-    promises.push(
-        upsertPointsRecords(
-            [{
-                balance: balance - reward.cost,
-                store_id: reward.store_id,
-                user_id: userID,
-            }],
-            supabase
-        )
-    );
-
-    // Step 3: insert new reward record
-    promises.push(
-        insertRewardRecord(
-            {
-                reward_type_id: reward.id,
-                user_id: userID,
-                redeemed_at: new Date().toISOString(),
-            },
-            supabase
-        )
-    );
-
-    return await Promise.all(promises)
-    .then(() => true)
-    .catch((e) => {
-        console.log('error redeeming reward:', e);
-        return false;
-    });
 }
+
