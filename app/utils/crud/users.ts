@@ -1,17 +1,15 @@
 
-import { fetchUserTransactions } from "./basiq";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, TablesInsert, TablesUpdate } from "@/types/supabase";
-import type { ResolvedPromise } from "@/types/helpers";
 
-export async function fetchUserData(
+export async function fetchUserRecord(
     userID: string,
     supabase: SupabaseClient<Database>
 ) {
     const { data, error } = await supabase
     .from('users')
-    .select('*, points(*, stores(*, reward_types(*))), rewards(*, reward_types(*)), transactions(*)')
+    .select('*')
     .eq('id', userID);
 
     if (error) {
@@ -19,25 +17,28 @@ export async function fetchUserData(
         throw new Error(`Error fecthing user data ${error}`);
     };
 
-    // fetch transactions data from Basiq
-    const recentTransactions = await fetchUserTransactions(data[0]['basiq_user_id'], 10);
-
-    // filter out transactions based on time last updated
-    const lastUpdated = data[0].last_updated? new Date(data[0].last_updated): null;
-    let newTransactions;
-    if (lastUpdated) {
-        newTransactions = recentTransactions.filter((transaction) => (new Date(transaction.postDate) > lastUpdated));
-    } else {
-        newTransactions = recentTransactions;
-    }
-
-    return {
-        ...data[0],
-        newTransactions
-    };
+    return data[0];
 }
 
-export async function fetchUserStoreRecord(
+export async function fetchAllUserData(
+    userID: string,
+    supabase: SupabaseClient<Database>
+) {
+    // called when user logs in to app
+    const { data, error } = await supabase
+    .from('users')
+    .select('*, points(*, stores(*, rewards(*))), redeemed(*, rewards(*)), transactions(*)')
+    .eq('id', userID);
+
+    if (error) {
+        console.log(error);
+        throw new Error(`Error fecthing user data ${error}`);
+    };
+
+    return data[0];
+}
+
+export async function fetchUserPointsRecordByStoreID(
     userID: string,
     storeID: string,
     supabase: SupabaseClient<Database>
@@ -49,8 +50,8 @@ export async function fetchUserStoreRecord(
     .eq('store_id', storeID);
 
     if (error) {
-        console.log(error);
-        throw new Error(`Error fecthing user data ${error}`);
+        console.log('Error fetching user points record: ', error.message);
+        return null;
     };
 
     return data? data[0]: null;
@@ -61,51 +62,15 @@ export async function updateUserRecord(
     userID: string,
     supabase: SupabaseClient<Database>
 ) {
-    const { data, error } = await supabase
+    const { error } = await supabase
     .from('users')
     .update(record)
-    .eq('id', userID)
-    .select('*, points(*), rewards(*), transactions(*)'); 
+    .eq('id', userID); 
     
     if (error) {
         console.log(`Error updating user record: `, error);
         throw new Error(`Error updating user record ${error}`);
     };
-
-    return data;
-}
-
-export async function fetchStoresById(
-    stores: string[],
-    supabase: SupabaseClient<Database>
-) {
-    const { data, error } = await supabase
-    .from('stores')
-    .select('*, reward_types(*)')
-    .in('id', stores);
-
-    if (error) {
-        console.log(`Error fecthing store data ${error}`);
-    };
-
-    return data;
-}
-
-export async function fetchStoresByVendorName(
-    vendorNames: string[],
-    supabase: SupabaseClient<Database>
-) {
-    const { data, error } = await supabase
-    .from('stores')
-    .select('id, vendor_name, points_rate, reward_types(*)')
-    .in('vendor_name', vendorNames);
-
-    if (error) {
-        console.log(`Error fecthing store data ${error}`);
-        throw new Error(`Error fecthing store data ${error}`);
-    };
-
-    return data;
 }
 
 export async function insertTransactions(
@@ -136,12 +101,12 @@ export async function upsertPointsRecords(
     };
 }
 
-export async function insertRewardRecord(
-    record: TablesInsert<'rewards'>,
+export async function insertRedeemedRecord(
+    record: TablesInsert<'redeemed'>,
     supabase: SupabaseClient<Database>
 ) {
     const { error } = await supabase
-    .from('rewards')
+    .from('redeemed')
     .insert(record);
 
     if (error) {
@@ -164,6 +129,3 @@ export async function deductFromStorePoints(
         throw new Error(`Error deducting store balance ${error.message}`);
     }
 }
-
-export type UserData = NonNullable<ResolvedPromise<ReturnType<typeof fetchUserData>>>;
-export type StoreData = NonNullable<ResolvedPromise<ReturnType<typeof fetchStoresById>>>[number];

@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
-import { fetchUserAccounts } from '@/lib/basiq';
-import { fetchUserData } from '@/lib/crud';
+import { fetchAccountsByUserID } from '@/utils/basiq/accounts';
+import { fetchUserRecord } from '@/utils/crud/users';
 
 import { isRequestAuthenticated } from '@/api/auth';
 
@@ -18,11 +18,11 @@ export async function GET(
     const supabase = createClient();
 
     // get user record
-    const userData = await fetchUserData(params.userID, supabase);
+    const user = await fetchUserRecord(params.userID, supabase);
 
     // fetch user account
     try {
-        const data = await fetchUserAccounts(userData.basiq_user_id);
+        const data = await fetchAccountsByUserID(user.basiq_user_id);
         
         return Response.json({ data }, { status: 200 });
     } catch (error) {

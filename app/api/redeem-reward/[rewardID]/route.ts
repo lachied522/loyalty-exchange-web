@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { redeemReward } from '@/utils/functions/user';
+import { redeemReward } from '@/utils/functions/rewards';
 
 import { headers } from 'next/headers';
 
@@ -27,7 +27,7 @@ export async function GET(
     const rewardID = params.rewardID;
     // fetch reward
     const { data: rewardData } = await supabase
-    .from('reward_types')
+    .from('rewards')
     .select('*')
     .eq('id', rewardID);
 

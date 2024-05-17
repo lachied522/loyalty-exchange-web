@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { createBasiqUser, getClientTokenBoundToUser } from '@/lib/basiq';
+import { createBasiqUser, getClientTokenBoundToUser } from '@/utils/basiq/users';
 
 import { headers } from 'next/headers';
 
@@ -29,23 +29,28 @@ export async function GET(
         return Response.json({ error: 'User does not have valid email or mobile' }, { status: 400 })
     }
 
-    // step 1: create Basiq user
-    const BasiqUserID = await createBasiqUser(user.email, user.user_metadata.mobile);
+    try {
+        // step 1: create Basiq user
+        const BasiqUserID = await createBasiqUser(user.email, user.user_metadata.mobile);
 
-    // step 2: get client access token bounded to user
-    const clientTokenBountToUser = await getClientTokenBoundToUser(BasiqUserID);
+        // step 2: get client access token bounded to user
+        const clientTokenBountToUser = await getClientTokenBoundToUser(BasiqUserID);
 
-    // step 3: store access token in Supabase
-    const { error: commitError } = await supabase
-    .from('users')
-    .update({ 'basiq_user_id': BasiqUserID })
-    .eq('id', user.id);
+        // step 3: store access token in Supabase
+        const { error: commitError } = await supabase
+        .from('users')
+        .update({ 'basiq_user_id': BasiqUserID })
+        .eq('id', user.id);
 
-    if (commitError) {
-        return Response.json({ error: commitError }, { status: 500 });
+        if (commitError) {
+            return Response.json({ error: commitError }, { status: 500 });
+        }
+
+        // return url for Consent UI
+        const url = `https://consent.basiq.io/home?token=${clientTokenBountToUser}&action=null`;
+        return Response.json({ url }, { status: 200 });
+    } catch (error) {
+        console.log('Error in create new connection route: ', error);
+        return Response.json({ error }, { status: 500 });
     }
-
-    // return url for Consent UI
-    const url = `https://consent.basiq.io/home?token=${clientTokenBountToUser}&action=null`;
-    return Response.json({ url }, { status: 200 });
 }

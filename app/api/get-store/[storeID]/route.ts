@@ -1,7 +1,7 @@
 import { headers } from 'next/headers';
 
 import { createClient } from '@/utils/supabase/server';
-import { fetchStoresById } from '@/lib/crud';
+import { fetchStoresById } from '@/utils/crud/stores';
 
 export async function GET(
     req: Request,
@@ -18,5 +18,9 @@ export async function GET(
 
     const data = await fetchStoresById([params.storeID], supabase);
 
-    return Response.json(data);
+    if (!data) {
+        return Response.json({}, { status: 404 });
+    }
+
+    return Response.json(data, { status: 200 });
 }

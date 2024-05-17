@@ -1,23 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
-
-import { getBasiqServerAccessToken } from '@/lib/basiq';
-
+import { deleteBasiqUser } from '@/utils/basiq/users';
 import { isRequestAuthenticated } from '@/api/auth';
-
-async function deleteBasiqUser(BasiqUserId: string) {
-    if (!BasiqUserId) return;
-
-    const serverAccessToken = await getBasiqServerAccessToken();
-
-    return fetch(`https://au-api.basiq.io/users/${BasiqUserId}`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${serverAccessToken}`,
-            'Accept': 'application/json',
-        },
-        body: JSON.stringify({ scope: 'SERVER_ACCESS' }),
-    });
-}
 
 export async function GET(
     req: Request,
@@ -29,22 +12,29 @@ export async function GET(
         return Response.json({} , { status: 401 })
     }
 
-    // delete user in Basiq API
     const supabase = createClient();
-    const { data: userData, error: userError } = await supabase
-    .from('users')
-    .select('basiq_user_id')
-    .eq('id', params.userID);
 
-    if (userData && userData[0].basiq_user_id) {
-        deleteBasiqUser(userData[0].basiq_user_id);
+    try {
+        // fetch user record
+        const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('basiq_user_id')
+        .eq('id', params.userID);
+
+        // delete user in Basiq API
+        if (userData && userData[0].basiq_user_id) {
+            deleteBasiqUser(userData[0].basiq_user_id);
+        }
+
+        const { data, error } = await supabase.auth.admin.deleteUser(params.userID);
+
+        if (error) {
+            throw error;
+        }
+
+        return Response.json(data);
+    } catch (error) {
+        console.log('Error deleting user: ', error);
+        return Response.json({ error }, { status: 500 });
     }
-
-    const { data, error } = await supabase.auth.admin.deleteUser(params.userID);
-
-    if (error) {
-        throw error;
-    }
-
-    return Response.json(data);
 }
