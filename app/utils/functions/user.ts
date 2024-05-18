@@ -79,7 +79,8 @@ export async function createTransactionRecords(
 
         if (!store) return acc;
 
-        const amount = parseFloat(obj.amount);
+        // NOTE: obj.amount is negative for payments, we will store positive value
+        const amount = -parseFloat(obj.amount);
         const points = amount * GLOBAL_POINTS_RATE;
 
         return [
@@ -87,7 +88,7 @@ export async function createTransactionRecords(
             {
                 amount,
                 points,
-                date: obj.transactionDate,
+                date: obj.transactionDate || obj.postDate,
                 user_id: userID,
                 store_id: store.id,
             }
