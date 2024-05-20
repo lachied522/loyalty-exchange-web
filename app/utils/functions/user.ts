@@ -9,6 +9,8 @@ import { fetchStoresByVendorName } from "../crud/stores";
 
 import { fetchTransactionsByUserID } from "../basiq/transactions";
 
+import { createClientChargeForCustomerTransaction } from "./billing";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Tables } from "@/types/supabase";
 import type { Transaction } from "@/types/basiq";
@@ -98,11 +100,13 @@ export async function createTransactionRecords(
     return newTransactions.reduce(reducer, []);
 }
 
-export async function processNewTransactions(
+export async function updateUserPointsRecordsOnNewTransactions(
     userID: string,
     newTransactions: ResolvedPromise<ReturnType<typeof createTransactionRecords>>,
     supabase: SupabaseClient<Database>,
 ) {
+    // update use points balances and insert new transaction records
+
     // calculate new points balance for each store
     let totalSpend = 0;
     const pointsMap = new Map<string, number>(); // { store_id: balance } for each transaction
@@ -119,38 +123,50 @@ export async function processNewTransactions(
         totalSpend += Math.abs(transaction.amount!);
     }
 
+    // update points balance at each store
+    return await upsertPointsRecords(
+        Array.from(pointsMap).map(([store_id, balance]) => ({
+            balance,
+            store_id,
+            user_id: userID,
+        })),
+        supabase
+    );
+}
+
+export async function processNewTransactions(
+    userID: string,
+    newTransactions: Transaction[],
+    supabase: SupabaseClient<Database>,
+) {
+    // raw transactions data must be processed into records
+    const newTransactionsRecords = await createTransactionRecords(userID, newTransactions, supabase);
     // initialise promises array
     const promises = [];
 
-    // update points balance at each store
+    // update user points records
     promises.push(
-        upsertPointsRecords(
-            Array.from(pointsMap).map(([store_id, balance]) => ({
-                balance,
-                store_id,
-                user_id: userID,
-            })),
-            supabase
-        )
-);
-
-    // insert records for new transactions
-    promises.push(insertTransactions(newTransactions, supabase));
-
-    // update user last_updated column
-    promises.push(
-        updateUserLastUpdated(
+        updateUserPointsRecordsOnNewTransactions(
             userID,
+            newTransactionsRecords,
             supabase
         )
     );
 
-    return await Promise.all(promises)
-    .then(() => true)
-    .catch((e) => {
-        console.log('error refreshing user data:', e);
-        return false;
-    });
+    // insert records for new transactions
+    promises.push(
+        insertTransactions(
+            newTransactionsRecords,
+            supabase
+        )
+    );
+
+    // charge client for new transactions
+    for (const transaction of newTransactionsRecords) {
+        createClientChargeForCustomerTransaction(transaction);
+    }
+
+    await Promise.all(promises);
 }
 
 export async function refreshUserData(
@@ -161,15 +177,16 @@ export async function refreshUserData(
     try {
         const newTransactions = await getNewTransactionsByUserID(userID, supabase, serverAccessToken);
 
-        if (newTransactions.length === 0) {
-            // update last_updated column and return false
-            await updateUserLastUpdated(userID, supabase);
-            return false;
+        let userHasNewData = false;
+        if (newTransactions.length > 0) {
+            await processNewTransactions(userID, newTransactions, supabase);
+            userHasNewData = true;
         };
-    
-        const newTransactionsRecords = await createTransactionRecords(userID, newTransactions, supabase);
-        
-        return await processNewTransactions(userID, newTransactionsRecords, supabase);
+
+        // update last_updated column and return false
+        // await updateUserLastUpdated(userID, supabase);
+
+        return userHasNewData;
     } catch (e) {
         console.log(`Error refreshing data for user ${userID}: `, e);
         return false;

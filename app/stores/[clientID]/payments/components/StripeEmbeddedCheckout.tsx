@@ -7,9 +7,9 @@ import {
 
 import getStripe from '@/utils/stripe/client';
 
-import { type ClientState, useClientContext } from '../../../context/ClientContext';
+import { type ClientState, useClientContext } from '../../context/ClientContext';
 
-import { createCheckoutSession } from '../actions/stripe';
+import { createCheckoutSession } from '../actions/sessions';
 
 export default function StripeEmbeddedCheckout() {
     const { clientData } = useClientContext() as ClientState;
@@ -22,10 +22,7 @@ export default function StripeEmbeddedCheckout() {
         async function getClientSecret() {
             if (isMounted) return;
             
-            const { client_secret } = await createCheckoutSession(
-                clientData.id,
-                clientData.email ?? ''
-            );
+            const { client_secret } = await createCheckoutSession(clientData);
 
             setClientSecret(client_secret);
 
