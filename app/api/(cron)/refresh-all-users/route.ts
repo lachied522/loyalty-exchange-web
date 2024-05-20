@@ -1,7 +1,8 @@
 // docs: https://vercel.com/docs/cron-jobs/manage-cron-jobs
 
-import { refreshUserData } from '@/utils/functions/user';
 import { createClient } from '@/utils/supabase/server';
+import { refreshUserData } from '@/utils/functions/user';
+import { getBasiqServerAccessToken } from '@/utils/basiq/server';
 
 export async function GET(req: Request) {
 
@@ -23,19 +24,22 @@ export async function GET(req: Request) {
         return Response.json({} , { status: 500 });
     }
 
-    // for each user, check if last update was greater than one hour ago
+    // get server access token
+    const serverAccessToken = await getBasiqServerAccessToken();
+
+    // for each user, check if last update was greater than 24 hours ago
     const now = new Date().getTime();
-    const hour = 1000 * 60 * 60;
+    const day = 1000 * 60 * 60 * 24;
     const queue: Promise<boolean>[] = [];
     for (const user of data) {
         const lastUpdated = user.last_updated? new Date(user.last_updated): null;
-        if (!lastUpdated || lastUpdated.getTime() > now - hour) {
+        if (!lastUpdated || now - lastUpdated.getTime() > day) {
 
             if (queue.length > 10) {
-                await queue[0];
+                await queue.shift();
             }
 
-            queue.push(refreshUserData(user.id, supabase));
+            queue.push(refreshUserData(user.id, supabase, serverAccessToken));
         }
     }
 

@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
-import { createBasiqUser, getClientTokenBoundToUser } from '@/lib/basiq';
-import { fetchUserData } from '@/lib/crud';
+
+import { createBasiqUser, getClientTokenBoundToUser } from '@/utils/basiq/users';
+import { fetchUserRecord } from '@/utils/crud/users';
 
 import { headers } from 'next/headers';
 
@@ -26,7 +27,7 @@ export async function GET(
         return Response.json({} , { status: 401 });
     }
 
-    const userData = await fetchUserData(user.id, supabase);
+    const userData = await fetchUserRecord(user.id, supabase);
     let BasiqUserID;
     if (!userData.basiq_user_id) {
         // user has not been created yet

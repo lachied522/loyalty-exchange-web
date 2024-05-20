@@ -73,9 +73,9 @@ export default function CreatePasswordForm({ clientID, email }: CreatePasswordFo
 
         const redirectUrl = searchParams.get('redirect');
         if (redirectUrl) {
-            router.replace(redirectUrl)
+            router.replace(redirectUrl);
         } else {
-            router.replace(`/stores/${clientID}/`);
+            router.replace(`/stores/${clientID}/dashboard`);
         }
     }
 

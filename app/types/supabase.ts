@@ -44,6 +44,30 @@ export type Database = {
           },
         ]
       }
+      jobs: {
+        Row: {
+          created: string
+          id: number
+          job_id: string | null
+          jobType: string | null
+          steps: Json | null
+        }
+        Insert: {
+          created?: string
+          id?: number
+          job_id?: string | null
+          jobType?: string | null
+          steps?: Json | null
+        }
+        Update: {
+          created?: string
+          id?: number
+          job_id?: string | null
+          jobType?: string | null
+          steps?: Json | null
+        }
+        Relationships: []
+      }
       points: {
         Row: {
           balance: number
@@ -77,11 +101,48 @@ export type Database = {
           },
         ]
       }
-      reward_types: {
+      redeemed: {
+        Row: {
+          id: string
+          redeemed_at: string
+          reward_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          redeemed_at?: string
+          reward_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          redeemed_at?: string
+          reward_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redeemed_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "rewards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rewards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rewards: {
         Row: {
           cost: number
           icon_name: string | null
           id: string
+          image_url: string | null
           promo_code: string | null
           reward_type: Database["public"]["Enums"]["reward_type"] | null
           store_id: string
@@ -91,6 +152,7 @@ export type Database = {
           cost?: number
           icon_name?: string | null
           id?: string
+          image_url?: string | null
           promo_code?: string | null
           reward_type?: Database["public"]["Enums"]["reward_type"] | null
           store_id: string
@@ -100,6 +162,7 @@ export type Database = {
           cost?: number
           icon_name?: string | null
           id?: string
+          image_url?: string | null
           promo_code?: string | null
           reward_type?: Database["public"]["Enums"]["reward_type"] | null
           store_id?: string
@@ -111,42 +174,6 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      rewards: {
-        Row: {
-          id: string
-          redeemed_at: string
-          reward_type_id: string
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          redeemed_at?: string
-          reward_type_id: string
-          user_id: string
-        }
-        Update: {
-          id?: string
-          redeemed_at?: string
-          reward_type_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "rewards_reward_type_id_fkey"
-            columns: ["reward_type_id"]
-            isOneToOne: false
-            referencedRelation: "reward_types"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "rewards_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
