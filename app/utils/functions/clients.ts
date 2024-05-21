@@ -9,7 +9,7 @@ export async function fetchClientData(clientID: string) {
 
     const { data, error } = await supabase
     .from('clients')
-    .select('*, stores(*, reward_types(*))')
+    .select('*, stores(*, rewards(*))')
     .eq('id', clientID);
 
     if (error) {

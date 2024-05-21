@@ -16,7 +16,7 @@ export default function HomePage() {
             <Logo withText={true} />
 
             <Link href='/stores' className='flex flex-row justify-end'>
-              <Button variant='ghost' className='text-lg font-medium hover:bg-yellow-200'>I am a store</Button>
+              <Button variant='ghost' className='sm:text-lg font-medium hover:bg-yellow-200'>I am a store</Button>
             </Link>
           </div>
 

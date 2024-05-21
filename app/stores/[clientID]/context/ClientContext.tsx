@@ -1,11 +1,18 @@
 "use client";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useReducer } from "react";
+
+import { createClient } from "@/utils/supabase/client";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { ClientReducer, type Action } from "./ClientReducer";
 
 import type { ClientData } from "@/utils/functions/clients";
+import type { Database } from "@/types/supabase";
 
 export type ClientState = {
+    supabase: SupabaseClient<Database>
     clientData: ClientData
-    setClientData: React.Dispatch<React.SetStateAction<ClientData>>
+    dispatch: React.Dispatch<Action>
 }
 
 const ClientContext = createContext<any>(null);
@@ -20,13 +27,16 @@ interface ClientContextProviderProps {
 }
 
 export default function ClientContextProvider({ children, initialState }: ClientContextProviderProps) {
-    const [clientData, setClientData] = useState(initialState);
+    const [state, dispatch] = useReducer<typeof ClientReducer>(ClientReducer, initialState);
+    // create supabase client to use for crud operations
+    const supabase = createClient();
 
     return (
         <ClientContext.Provider
             value={{
-                clientData,
-                setClientData,
+                supabase,
+                clientData: state,
+                dispatch
             }}
         >
             {children}

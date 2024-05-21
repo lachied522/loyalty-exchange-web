@@ -5,14 +5,14 @@ import {
     updateUserRecord,
     upsertPointsRecords,
 } from "../crud/users";
-import { fetchStoresByVendorName } from "../crud/stores";
+import { fetchStoreByVendorName } from "../crud/stores";
 
 import { fetchTransactionsByUserID } from "../basiq/transactions";
 
-import { createClientChargeForCustomerTransaction } from "./billing";
+import { handleClientChargesForNewTransactions } from "./billing";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, Tables } from "@/types/supabase";
+import type { Database } from "@/types/supabase";
 import type { Transaction } from "@/types/basiq";
 
 import type { ResolvedPromise } from "@/types/helpers";
@@ -70,34 +70,30 @@ export async function createTransactionRecords(
     // create new transaction records by merging transactions from Basiq api with store data and user ID
     if (newTransactions.length === 0) return [];
 
-    // get stores where vendor name matches transaction description
-    const storeData = await fetchStoresByVendorName(
-        newTransactions.map((transaction) => transaction.description.toUpperCase()),
-        supabase
-    );
+    const newTransactionRecords = [];
+    for (const transaction of newTransactions) {
+        // get store where vendor name matches transaction description
+        const stores = await fetchStoreByVendorName(
+            transaction.description.toUpperCase(),
+            supabase
+        );
 
-    function reducer(acc: Omit<Tables<'transactions'>, 'id'>[], obj: Transaction) {
-        const store = storeData.find((store) => store.vendor_name === obj.description);
+        if (!(stores && stores.length)) continue;
 
-        if (!store) return acc;
-
-        // NOTE: obj.amount is negative for payments, we will store positive value
-        const amount = -parseFloat(obj.amount);
+        // NOTE: amount is negative for payments, we will store positive value
+        const amount = -parseFloat(transaction.amount);
         const points = amount * GLOBAL_POINTS_RATE;
 
-        return [
-            ...acc,
-            {
-                amount,
-                points,
-                date: obj.transactionDate || obj.postDate,
-                user_id: userID,
-                store_id: store.id,
-            }
-        ]
+        newTransactionRecords.push({
+            amount,
+            points,
+            date: transaction.transactionDate || transaction.postDate,
+            user_id: userID,
+            store_id: stores[0].id,
+        });
     }
 
-    return newTransactions.reduce(reducer, []);
+    return newTransactionRecords;
 }
 
 export async function updateUserPointsRecordsOnNewTransactions(
@@ -162,9 +158,8 @@ export async function processNewTransactions(
     );
 
     // charge client for new transactions
-    for (const transaction of newTransactionsRecords) {
-        createClientChargeForCustomerTransaction(transaction);
-    }
+    // this doesn't need to be awaited
+    handleClientChargesForNewTransactions(newTransactionsRecords);
 
     await Promise.all(promises);
 }

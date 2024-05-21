@@ -11,7 +11,7 @@ import { stripe } from "@/utils/stripe/server";
 import type { ClientData } from "@/types/helpers";
 
 const PRICE_ID = 
-    process.env.ENVIRONMENT === 'production'? 
+    process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'? 
     process.env.STRIPE_PRICE_ID: 
     process.env.STRIPE_TEST_PRICE_ID;
 

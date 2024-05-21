@@ -2,6 +2,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import RewardDialog from "./reward-dialog";
+import DeleteRewardDialog from "./delete-reward-dialog";
 
 import type { Reward } from "@/types/helpers";
 
@@ -20,4 +21,10 @@ export const columns: ColumnDef<Reward>[] = [
       <RewardDialog rewardData={row.original} />
     )
   },
+  {
+    header: 'Delete',
+    cell: ({ row }) => (
+      <DeleteRewardDialog rewardID={row.original.id} />
+    )
+  }
 ]

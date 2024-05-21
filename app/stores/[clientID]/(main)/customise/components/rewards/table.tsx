@@ -69,7 +69,7 @@ export default function RewardsTable<TData, TValue>({
                 ) : (
                     <TableRow>
                         <TableCell colSpan={columns.length} className="h-24 text-center">
-                            No results.
+                            You don&apos;t have any rewards yet. Create a new reward above.
                         </TableCell>
                     </TableRow>
                 )}

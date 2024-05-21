@@ -1,61 +1,46 @@
-"use client";
-import { useState, useEffect } from "react";
 import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/components/lib";
+interface ImageUploaderProps {
+    bucket: 'logos'|'stores'|'rewards',
+    alt: string,
+    value: string | null, // url of image
+    onChangeURL: (url: string) => void,
+    onChangeFile: (file: File) => void,
+}
 
-import { type CustomiseState, useCustomiseContext } from "../context/CustomiseContext";
-import { uploadImage } from "../actions/upload-image";
+export default function ImageUploader({
+    value,
+    alt,
+    onChangeURL,
+    onChangeFile
+} : ImageUploaderProps) {
 
-export default function ImageUploader({ content } : { content: 'logo'|'store' }) {
-    const { selectedStoreData } = useCustomiseContext() as CustomiseState;
-    const [image, setImage] = useState<string | null>(selectedStoreData.store_img_url);
-    const [isInputVisible, setIsInputVisible] = useState<boolean>(!image);
-
-    const _key = content === 'store'? 'store_img_url': 'store_logo_url';
-
-    useEffect(() => {
-        setImage(selectedStoreData[_key]);
-
-        if (selectedStoreData[_key]) {
-            setIsInputVisible(!selectedStoreData[_key]);
-        }
-    }, [selectedStoreData[_key], setImage]);
-
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target!.files![0];
-        const formData = new FormData();
-        formData.append('image', file);
-
-        const res = await uploadImage(
-            selectedStoreData.id,
-            formData,
-            content
-        );
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
         
-        if (!res) {
-            return
-        }
-
         const reader = new FileReader();
-    
         reader.onload = () => {
-          if (reader.readyState === 2) {
-            setImage(res);
-          }
+            if (reader.readyState === 2) {
+                onChangeURL(reader.result as string);
+            }
         };
-    };
+    
+        if (file) {
+            reader.readAsDataURL(file);
+            onChangeFile(file);
+        }
+    }
     
     return (
-        <div className='flex flex-col items-stretch gap-4'>
-            {image && !isInputVisible ? (
+        <div className='flex flex-col items-center gap-6'>
+            {value ? (
             <div className='h-[240px] flex items-center relative'>
                 <Image
-                    src={image}
-                    alt="Your Store Image"
-                    sizes="(height: 240px)"
-                    fill={true}
+                    src={value}
+                    alt={alt}
+                    height={240}
+                    width={360}
+                    style={{ borderRadius: 12 }}
                 />
             </div>
             ) : (
@@ -63,17 +48,10 @@ export default function ImageUploader({ content } : { content: 'logo'|'store' })
                 <input
                     type="file"
                     accept="image/*"
-                    onChange={handleImageUpload}
+                    onChange={handleImageChange}
                 />
             </div>
             )}
-            <div className='w-full flex justify-start'>
-                {(image && !isInputVisible) && (
-                <Button onClick={() => setIsInputVisible(true)}>
-                    Change
-                </Button>
-                )}
-            </div>
         </div>
     )
 }

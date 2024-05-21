@@ -1,3 +1,6 @@
+"use client";
+import { useState, useRef } from "react";
+
 import {
     Dialog,
     DialogContent,
@@ -11,16 +14,34 @@ import { Button } from "@/components/ui/button";
 
 import { Trash } from "lucide-react";
 
+import { type CustomiseState, useCustomiseContext } from "../../context/CustomiseContext";
 
 interface DeleteRewardDialogProps {
     rewardID: string
 }
 
-export default function DeleteRewardDialog({ rewardID }: DeleteRewardDialogProps) {
+export default function DeleteRewardDialog({ rewardID } : DeleteRewardDialogProps) {
+    const { deleteRewardRecordAndUpdateState } = useCustomiseContext() as CustomiseState;
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const closeRef = useRef<HTMLButtonElement | null>(null);
+
+    const onDelete = async () => {
+        setIsLoading(true);
+
+        try {
+            await deleteRewardRecordAndUpdateState(rewardID);
+
+            // close modal
+            if (closeRef && closeRef.current) closeRef.current.click();
+        } catch (e) {
+            console.log(e);
+            setIsLoading(false);
+        }
+    }
 
     return (
         <Dialog>
-            <DialogTrigger>
+            <DialogTrigger asChild>
                 <Button
                     type="button"
                     variant='destructive'
@@ -40,16 +61,24 @@ export default function DeleteRewardDialog({ rewardID }: DeleteRewardDialogProps
 
                 <div className='w-full flex flex-row items-center justify-between'>
                     <DialogClose asChild>
-                        <Button variant='secondary'>
+                        <Button
+                            ref={closeRef}
+                            variant='secondary'
+                            disabled={isLoading}
+                        >
                             Cancel
                         </Button>
                     </DialogClose>
 
-                    <DialogClose asChild>
-                        <Button variant='destructive'>
-                            Confirm
-                        </Button>
-                    </DialogClose>
+                    {isLoading ? (
+                    <Button variant='secondary' disabled>
+                        Please wait...
+                    </Button>
+                    ) : (
+                    <Button variant='destructive' onClick={onDelete}>
+                        Confirm
+                    </Button> 
+                    )}
                 </div>
             </DialogContent>
         </Dialog>

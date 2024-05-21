@@ -1,18 +1,24 @@
 import { stripe } from "./server";
 
-import type { Tables } from "@/types/supabase";
+import type { ClientData } from "@/types/helpers";
 
-const GLOBAL_REFERRAL_FEE_RATE = 0.025;
-
-export async function createCustomerReferralEventFromTransaction(
-    customerTransaction: Omit<Tables<'transactions'>, 'id'>, // fee amount in CENTS
-    stripeCustomerID: string
+export async function createCustomerReferralEventFromTotalSpend(
+    totalCustomerSpend: number,
+    clientData: Omit<ClientData, 'stores'>,
 ) {
-    const amountInDollars = customerTransaction.amount * GLOBAL_REFERRAL_FEE_RATE;
-
-    if (amountInDollars < 0) {
+    if (totalCustomerSpend < 0) {
         throw new Error('Amount must be greater than zero. Use meter event adjustment if adjustment is needed.');
     }
+
+    if (!clientData.stripe_customer_id) {
+        throw new Error(`Client is missing Stripe customer ID for ${clientData.id}`);
+    }
+
+    if (clientData.fee_rate < 1) {
+        console.log(`Fee rate appears to be less than 1% for ${clientData.id}. Check that rate is a percentage.`);
+    }
+
+    const amountInDollars = totalCustomerSpend * clientData.fee_rate / 100;
 
     // amount must be a whole number
     const amountInCents = Math.ceil(amountInDollars * 100);
@@ -22,7 +28,7 @@ export async function createCustomerReferralEventFromTransaction(
         event_name: 'customer_referral',
         payload: {
           value: amountInCents.toString(),
-          stripe_customer_id: stripeCustomerID,
+          stripe_customer_id: clientData.stripe_customer_id,
         },
     });
 

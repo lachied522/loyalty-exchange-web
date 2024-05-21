@@ -28,7 +28,7 @@ export default function StripeEmbeddedCheckout() {
 
             isMounted = true;
         }
-    }, [setClientSecret]);
+    }, [setClientSecret, clientData]);
 
     return (
         <div className='w-full max-w-[960px] min-w-[360px] sm:p-12 p-6 bg-white'>

@@ -2,7 +2,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-import { Home, Cog, Receipt } from 'lucide-react';
+import { Home, Cog, Receipt, Store } from 'lucide-react';
 
 import { cn } from "@/components/lib";
 
@@ -37,11 +37,11 @@ export default function Sidebar() {
                         pathname.endsWith('/customise') && 'text-yellow-400'
                     )}
                 >
-                    <Receipt />
-                    <div className='font-semibold text-xs'>Customise</div>
+                    <Store />
+                    <div className='font-semibold text-xs'>Stores</div>
                 </Link>
 
-                <Link
+                {/* <Link
                     href={`/stores/${clientData.id}/payments`}
                     className={cn(
                         'grid grid-cols-[25px,1fr] items-center justify-start gap-1.5',
@@ -50,7 +50,7 @@ export default function Sidebar() {
                 >
                     <Cog />
                     <div className='font-semibold text-xs'>Settings</div>
-                </Link>
+                </Link> */}
             </nav>
         </aside>
     )

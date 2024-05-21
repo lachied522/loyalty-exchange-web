@@ -14,6 +14,7 @@ export type Database = {
           auth_user_id: string | null
           created_at: string
           email: string | null
+          fee_rate: number
           id: string
           name: string | null
           stripe_customer_id: string | null
@@ -22,6 +23,7 @@ export type Database = {
           auth_user_id?: string | null
           created_at?: string
           email?: string | null
+          fee_rate?: number
           id?: string
           name?: string | null
           stripe_customer_id?: string | null
@@ -30,6 +32,7 @@ export type Database = {
           auth_user_id?: string | null
           created_at?: string
           email?: string | null
+          fee_rate?: number
           id?: string
           name?: string | null
           stripe_customer_id?: string | null
@@ -310,7 +313,71 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      gtrgm_compress: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      gtrgm_decompress: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      gtrgm_in: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      gtrgm_options: {
+        Args: {
+          "": unknown
+        }
+        Returns: undefined
+      }
+      gtrgm_out: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      search_vendor_names: {
+        Args: {
+          query: string
+        }
+        Returns: {
+          address_line_1: string | null
+          city: string | null
+          client_id: string
+          created_at: string
+          id: string
+          name: string
+          points_rate: number
+          postcode: string | null
+          state: string | null
+          store_img_url: string | null
+          store_logo_url: string | null
+          vendor_name: string
+        }[]
+      }
+      set_limit: {
+        Args: {
+          "": number
+        }
+        Returns: number
+      }
+      show_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      show_trgm: {
+        Args: {
+          "": string
+        }
+        Returns: string[]
+      }
     }
     Enums: {
       reward_type: "free_item" | "discount" | "promo_code"

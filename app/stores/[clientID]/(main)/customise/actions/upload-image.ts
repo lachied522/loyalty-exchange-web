@@ -5,8 +5,9 @@ import { createClient } from "@/utils/supabase/server";
 const supabase = createClient();
 
 export async function uploadImageToBucket(
+    pathname: string,
     formData: FormData,
-    path: string,
+    bucket: 'stores'|'logos'|'rewards'
 ) {
     const image = formData.get('image');
 
@@ -14,9 +15,9 @@ export async function uploadImageToBucket(
 
     const { data, error } = await supabase
     .storage
-    .from('stores')
+    .from(bucket)
     .upload(
-        path,
+        pathname,
         image,
         {
             contentType: 'image/jpeg',
@@ -32,54 +33,31 @@ export async function uploadImageToBucket(
     return data.path;
 }
 
-function getPublicURL(path: string) {
+function getPublicURL(
+    bucket: 'stores'|'logos'|'rewards',
+    path: string
+) {
     
     const { data } = supabase
     .storage
-    .from('stores')
+    .from(bucket)
     .getPublicUrl(path);
 
     return data.publicUrl;
 }
 
-export async function updateStoreRecord(
-    storeID: string,
-    field: 'store_img_url'|'store_logo_url',
-    value: string
-) {
-    
-    const { error } = await supabase
-    .from('stores')
-    .update({ [field]: value })
-    .eq('id', storeID);
-
-    if (error) {
-        console.log(`Error updating store record: `, error);
-        throw new Error(`Error updating store record ${error}`);
-    };
-}
-
-
 export async function uploadImage(
-    storeID: string,
+    pathname: string,
     formData: FormData,
-    content: 'store'|'logo'
+    bucket: 'stores'|'logos'|'rewards'
 ) {
-
     // Step 1: add image to bucket
-    const bucketPathname = storeID + (
-        content === 'store'? '_store_img': '_store_logo'
-    )
-    const path = await uploadImageToBucket(formData, bucketPathname);
+    const path = await uploadImageToBucket(pathname, formData, bucket);
 
     if (!path) return;
 
-    // Step 3: get public URL of uploading image
-    const url = getPublicURL(path);
+    // Step 2: get public URL of uploading image
+    const url = getPublicURL(bucket, path);
 
-    // Step 2: update corresponding field in store record
-    const field = content === 'store'? 'store_img_url': 'store_logo_url';
-    await updateStoreRecord(storeID, field, url);
-
-    return path;
+    return url;
 }

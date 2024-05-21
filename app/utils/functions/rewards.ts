@@ -21,6 +21,13 @@ export async function redeemReward(
         return false;
     }
 
+    if (reward.reward_type === 'promo_code') {
+        if (!reward.promo_code) {
+            console.log(`Cannot redeem reward, promo code is missing for ${reward.id}`);
+            return false;
+        }
+    }
+
     const promises = [];
     // Step 2: adjust user's points balance at store
     promises.push(

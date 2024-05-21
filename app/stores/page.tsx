@@ -19,11 +19,11 @@ export default function StorePage() {
                     <Logo withText={true} />
 
                     <Link href='/' className='flex flex-row justify-end'>
-                        <Button variant='ghost' className='text-lg font-medium hover:bg-yellow-200'>I am a customer</Button>
+                        <Button variant='ghost' className='sm:text-lg font-medium hover:bg-yellow-200'>I am a customer</Button>
                     </Link>
                 </div>
 
-                <div className='min-h-[440px] flex flex-col items-center sm:p-24 p-12'>
+                <div className='min-h-[440px] flex flex-col items-center sm:p-24 xs:p-12 p-6'>
                     <div className='flex flex-col gap-6'>
                         <div className='flex md:flex-row flex-col md:items-center items-start gap-3.5 md:mb-6 mb-2'>
                             <h1 className='sm:text-4xl text-3xl font-semibold'>Loyalty Exchange is launching soon</h1>
@@ -50,7 +50,7 @@ export default function StorePage() {
             <section className='flex flex-col items-center justify-center sm:p-24 p-12 gap-12'>
                 <h1 className='sm:text-4xl text-3xl font-semibold'>How we help your business</h1>
 
-                <div className='grid lg:grid-cols-3 grid-cols-2 lg:gap-16 gap-12'>
+                <div className='max-w-[1600px] grid lg:grid-cols-3 grid-cols-2 lg:gap-16 gap-12'>
                     <div className='flex flex-col items-start gap-2.5'>
                         <div className='bg-yellow-200 rounded-full p-3 mb-2'>
                             <TrendingUp size={32} color='black' />
