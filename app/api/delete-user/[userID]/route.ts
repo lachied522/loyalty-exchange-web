@@ -1,6 +1,8 @@
 import { createClient } from '@/utils/supabase/server';
-import { deleteBasiqUser } from '@/utils/basiq/users';
+
 import { isRequestAuthenticated } from '@/api/auth';
+
+import { deleteBasiqUser } from '@/utils/basiq/users';
 
 export async function GET(
     req: Request,
@@ -12,29 +14,41 @@ export async function GET(
         return Response.json({} , { status: 401 })
     }
 
-    const supabase = createClient();
-
     try {
-        // fetch user record
+        const supabase = createClient();
+
+        // 1. Fetch user record
         const { data: userData, error: userError } = await supabase
         .from('users')
         .select('basiq_user_id')
         .eq('id', params.userID);
 
-        // delete user in Basiq API
-        if (userData && userData[0].basiq_user_id) {
-            deleteBasiqUser(userData[0].basiq_user_id);
+        // 2. Delete Basiq user
+        let isBasiqUserDeleted = true; // default to true, will be made false if below fails
+        if (userData && userData.length && userData[0].basiq_user_id) {
+            isBasiqUserDeleted = await deleteBasiqUser(userData[0].basiq_user_id);
         }
 
-        const { data, error } = await supabase.auth.admin.deleteUser(params.userID);
+        // 3. Delete user from 'public' table
+        const { error: publicError } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', params.userID);
 
-        if (error) {
-            throw error;
+        if (publicError) {
+            return Response.json({}, { status: 500 });
         }
 
-        return Response.json(data);
-    } catch (error) {
+        // 4. Delete user from 'auth' table
+        const { error: authError } = await supabase.auth.admin.deleteUser(params.userID);
+
+        if (authError) {
+            return Response.json({}, { status: authError.status });
+        }
+
+        return Response.json({} ,{ status: 200 });
+    } catch (error: any) {
         console.log('Error deleting user: ', error);
-        return Response.json({ error }, { status: 500 });
+        return Response.json({}, { status: 500 });
     }
 }

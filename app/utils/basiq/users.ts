@@ -5,6 +5,7 @@ export async function createBasiqUser(
     mobile: string,
     serverAccessToken?: string,
 ): Promise<string> {
+    // see https://api.basiq.io/reference/createuser
     if (!serverAccessToken) {
         serverAccessToken = await getBasiqServerAccessToken();
     }
@@ -34,7 +35,8 @@ export async function deleteBasiqUser(
     BasiqUserId: string,
     serverAccessToken?: string
 ) {
-    if (!BasiqUserId) return;
+    // see https://api.basiq.io/reference/deleteuser
+    if (!BasiqUserId) return true;
 
     if (!serverAccessToken) {
         serverAccessToken = await getBasiqServerAccessToken();
@@ -52,18 +54,19 @@ export async function deleteBasiqUser(
         }
     );
     
-    if (!res.ok) {
-        console.log('Error deleting Basiq user, status: ', res.status);
-        throw new Error('Error deleting Basiq user.');
+    // if status is 404 Basiq user does not exist, okay to pass
+    if (!(res.ok || res.status === 404)) {
+        console.error('Error deleting Basiq user, status: ', res.status);
+        return false;
     };
 
-    return await res.json();
+    return true;
 }
 
-// see docs at https://api.basiq.io/docs/quickstart-api
 export async function getClientTokenBoundToUser(
     BasiqUserId: string
 ): Promise<string> {
+    // see https://api.basiq.io/docs/quickstart-api
     const res = await fetch(
         'https://au-api.basiq.io/token',
         {

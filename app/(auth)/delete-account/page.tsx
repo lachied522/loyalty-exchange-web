@@ -6,28 +6,29 @@ import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
 import { Button } from "@/components/ui/button";
+
 import Logo from "@/logo";
 
 export default function DeleteAccountPage() {
     const [user, setUser] = useState<User | null>()
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const router = useRouter();
 
     const supabase = createClient();
 
     useEffect(() => {
-        getUser();
+        getUser().then(() => setIsLoading(false));
 
         async function getUser() {
             if (user) return;
 
             const { data } = await supabase.auth.getUser();
 
-            if (!data) {
+            if (!data.user) {
                 router.replace('/login?redirect=delete-account');
+            } else {
+                setUser(data.user);
             }
-
-            setUser(data.user);
         }
     }, [router, user, supabase.auth]);
 
@@ -36,6 +37,9 @@ export default function DeleteAccountPage() {
         setIsLoading(true);
 
         await fetch(`/api/delete-user/${user.id}`);
+        // sign out user
+        await supabase.auth.signOut();
+        // navigate to home page
         router.replace('/');
     }
 
