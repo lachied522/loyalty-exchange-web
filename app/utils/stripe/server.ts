@@ -3,7 +3,7 @@ import "server-only";
 import Stripe from "stripe";
 
 const API_KEY = 
-    process.env.ENVIRONMENT === 'production'?
+    process.env.NEXT_PUBLIC_ENVIRONMENT === 'production'?
     process.env.STRIPE_SECRET_KEY!:
     process.env.STRIPE_TEST_SECRET_KEY!
 

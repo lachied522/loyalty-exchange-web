@@ -24,7 +24,7 @@ export default function PaymentPage() {
     return (
         <>
             {checkoutSessionID ? (
-            <div className='w-full max-w-[960px] min-w-[360px] sm:p-12 p-6 bg-neutral-100'>
+            <div className='w-full max-w-[960px] min-w-[360px] sm:p-12 p-6 border border-neutral-100'>
                 <div className='flex flex-col items-center'>
                     <h4 className='text-lg font-medium'>Thank You</h4>
                     <p>You may close this window.</p>

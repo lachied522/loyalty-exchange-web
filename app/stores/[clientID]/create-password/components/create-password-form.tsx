@@ -11,46 +11,44 @@ import { createClient } from "@/utils/supabase/client";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from '@/components/ui/input';
 import { Button } from "@/components/ui/button";
 
+import { type ClientState, useClientContext } from '../../context/ClientContext';
+
 const formSchema = z.object({
-    email: z.string(),
-    password: z.string(),
+    email: z.string().email().min(1, { message: 'Please enter a valid email.' }),
+    password: z.string().min(6, 'Password must be at least 6 characters.'),
     passwordConfirm: z.string(),
 })
 .refine((obj) => obj.password === obj.passwordConfirm, {
-    message: "Passwords do not match"
+    message: 'Passwords do not match',
+    path: ['passwordConfirm']
 });
 
-
-interface CreatePasswordFormProps {
-    clientID: string
-    email: string | null
-}
-
-export default function CreatePasswordForm({ clientID, email }: CreatePasswordFormProps) {
+export default function CreatePasswordForm() {
+    const { clientData } = useClientContext() as ClientState;
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    const supabase = createClient();
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: email || "", // email should already exist
-            password: "",
-            passwordConfirm: "",
+            email: clientData.email || '', // email should already exist
+            password: '',
+            passwordConfirm: '',
         },
     });
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        const supabase = createClient();
+
         setIsLoading(true);
 
         // create new user in supabase with 'client' role
@@ -66,7 +64,7 @@ export default function CreatePasswordForm({ clientID, email }: CreatePasswordFo
         });
 
         if (error) {
-            console.log(error);
+            form.setError('passwordConfirm', { message: error.message });
             setIsLoading(false);
             return;
         }
@@ -75,7 +73,7 @@ export default function CreatePasswordForm({ clientID, email }: CreatePasswordFo
         if (redirectUrl) {
             router.replace(redirectUrl);
         } else {
-            router.replace(`/stores/${clientID}/dashboard`);
+            router.replace(`/stores/${clientData.id}/dashboard`);
         }
     }
 
@@ -89,9 +87,9 @@ export default function CreatePasswordForm({ clientID, email }: CreatePasswordFo
                         <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                                <Input {...field} disabled={!!email} />
+                                <Input {...field} disabled={!!clientData.email} />
                             </FormControl>
-                            <FormDescription />
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
@@ -104,7 +102,7 @@ export default function CreatePasswordForm({ clientID, email }: CreatePasswordFo
                         <FormControl>
                             <Input type="password" {...field} />
                         </FormControl>
-                        <FormDescription />
+                        <FormMessage />
                     </FormItem>
                     )}
                 />
@@ -113,16 +111,16 @@ export default function CreatePasswordForm({ clientID, email }: CreatePasswordFo
                     name="passwordConfirm"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel>Confirm Password</FormLabel>
                         <FormControl>
                             <Input type="password" {...field} />
                         </FormControl>
-                        <FormDescription />
+                        <FormMessage />
                     </FormItem>
                     )}
                 />
                 <Button type="submit" disabled={isLoading} className='font-bold' onClick={() => console.log(form.formState.errors)}>
-                    Submit
+                    {isLoading? 'Please wait...': 'Submit'}
                 </Button>
             </form>
         </Form>

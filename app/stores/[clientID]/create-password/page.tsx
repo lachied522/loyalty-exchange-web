@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 
 import Logo from "@/logo";
 import CreatePasswordForm from "./components/create-password-form";
-import { type ClientState, useClientContext } from '../context/ClientContext';
 
 function FormPlaceholder() {
     return (
@@ -20,16 +19,15 @@ function FormPlaceholder() {
     )
 }
 
-export default async function CreatePasswordPage({ params } : { params: { clientID: string } }) {
-    const { clientData } = useClientContext() as ClientState;
-
+export default async function CreatePasswordPage() {
+    
     return (
         <main className='h-[100vh] flex items-center justify-center bg-yellow-100 p-12'>
             <div className='h-full flex flex-col items-center gap-12'>
                 <Logo withText />
                 <h1 className='md:text-4xl text-3xl font-semibold'>Please create a password</h1>
                 <Suspense fallback={<FormPlaceholder />}>
-                    <CreatePasswordForm clientID={params.clientID} email={clientData.email} />
+                    <CreatePasswordForm />
                 </Suspense>
             </div>
         </main>
