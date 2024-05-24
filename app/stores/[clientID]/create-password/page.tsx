@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 
 import Logo from "@/logo";
 import CreatePasswordForm from "./components/create-password-form";
-import { type ClientState, useClientContext } from '../context/ClientContext';
+import { type ClientIDState, useClientIDContext } from '../context/ClientIDContext';
 
 function FormPlaceholder() {
     return (
@@ -21,7 +21,7 @@ function FormPlaceholder() {
 }
 
 export default async function CreatePasswordPage({ params } : { params: { clientID: string } }) {
-    const { clientData } = useClientContext() as ClientState;
+    const { clientData } = useClientIDContext() as ClientIDState;
 
     return (
         <main className='h-[100vh] flex items-center justify-center bg-yellow-100 p-12'>

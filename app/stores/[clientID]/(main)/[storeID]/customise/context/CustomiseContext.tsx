@@ -6,13 +6,13 @@ import { upsertRewardRecord, deleteReward } from "@/utils/crud/rewards";
 
 import { uploadImage } from "../actions/upload-image";
 
-import { type ClientState, useClientContext } from "../../../context/ClientContext";
+import { type ClientIDState, useClientIDContext } from "../../../../context/ClientIDContext";
 
 import type { Tables, TablesInsert, TablesUpdate } from "@/types/supabase";
 
 export type CustomiseState = {
     selectedStoreID: string
-    selectedStoreData: ClientState['clientData']['stores'][number]
+    selectedStoreData: ClientIDState['clientData']['stores'][number]
     setSelectedStoreID: React.Dispatch<React.SetStateAction<string>>
 
     updateStoreRecordAndUpdateState: (data: TablesUpdate<'stores'>) => Promise<void>
@@ -34,7 +34,7 @@ interface CustomiseContextProviderProps {
 }
 
 export default function CustomiseContextProvider({ children }: CustomiseContextProviderProps) {
-    const { supabase, clientData, dispatch } = useClientContext() as ClientState;
+    const { supabase, clientData, dispatch } = useClientIDContext() as ClientIDState;
     const [selectedStoreID, setSelectedStoreID] = useState<string>(clientData.stores[0].id);
 
     const selectedStoreData = useMemo(() => {

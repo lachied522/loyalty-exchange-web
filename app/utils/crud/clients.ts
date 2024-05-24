@@ -24,7 +24,7 @@ export async function fetchClientByClientID(
 ) {
     const { data, error } = await supabase
     .from('clients')
-    .select('*')
+    .select('*, stores(*, rewards(*))')
     .eq('id', clientID);
 
     if (error) {

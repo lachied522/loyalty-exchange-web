@@ -7,12 +7,12 @@ import {
 
 import getStripe from '@/utils/stripe/client';
 
-import { type ClientState, useClientContext } from '../../context/ClientContext';
+import { type ClientIDState, useClientIDContext } from '../../context/ClientIDContext';
 
 import { createCheckoutSession } from '../actions/sessions';
 
 export default function StripeEmbeddedCheckout() {
-    const { clientData } = useClientContext() as ClientState;
+    const { clientData } = useClientIDContext() as ClientIDState;
     const [clientSecret, setClientSecret] = useState<string | null>(null);
 
     useEffect(() => {

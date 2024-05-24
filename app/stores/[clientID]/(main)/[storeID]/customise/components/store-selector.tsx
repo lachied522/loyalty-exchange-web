@@ -8,12 +8,12 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import { type ClientState, useClientContext } from "../../../context/ClientContext";
-import { type DashboardState, useDashboardContext } from "../context/DashboardContext";
+import { type ClientIDState, useClientIDContext } from "../../../../context/ClientIDContext";
+import { type CustomiseState, useCustomiseContext } from "../context/CustomiseContext";
 
 export default function StoreSelector() {
-    const { clientData } = useClientContext() as ClientState;
-    const { setSelectedStoreID } = useDashboardContext() as DashboardState;
+    const { clientData } = useClientIDContext() as ClientIDState;
+    const { setSelectedStoreID } = useCustomiseContext() as CustomiseState;
 
     return (
         <Select

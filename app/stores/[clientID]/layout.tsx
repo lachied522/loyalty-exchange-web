@@ -1,17 +1,19 @@
 import { notFound } from "next/navigation";
 
-import { fetchClientData } from "@/utils/functions/clients";
+import { createClient } from "@/utils/supabase/server";
 
-import ClientContextProvider from "./context/ClientContext";
+import { fetchClientByClientID } from "@/utils/crud/clients";
+
+import ClientContextProvider from "./context/ClientIDContext";
 
 interface ClientIDLayoutProps {
     children: React.ReactNode
     params: { clientID: string }
 }
 
-export default async function ClientIDLayout({ children, params } : ClientIDLayoutProps) {
-
-    const data = await fetchClientData(params.clientID);
+export default async function ClientIDLayout({ children, params }: ClientIDLayoutProps) {
+    const supabase = createClient();
+    const data = await fetchClientByClientID(params.clientID, supabase);
 
     if (!data) {
         notFound();

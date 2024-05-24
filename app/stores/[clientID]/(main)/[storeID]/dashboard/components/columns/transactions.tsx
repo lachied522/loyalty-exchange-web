@@ -1,12 +1,7 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 
-import { formatDate } from "@/utils/functions/formatting";
-
-const USDollar = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
+import { formatDate, formatAmount } from "@/utils/functions/formatting";
 
 export type Transaction = {
     date: string,
@@ -31,7 +26,7 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "amount",
     header: "Amount",
     cell: ({ row }) => (
-      <div>{USDollar.format(row.getValue('amount'))}</div>
+      <div className='text-green-400'>{formatAmount(row.getValue('amount'))}</div>
     )
   },
   {

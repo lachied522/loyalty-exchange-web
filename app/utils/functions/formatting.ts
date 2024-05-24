@@ -1,4 +1,17 @@
 
+const USDollar = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+})
+
+export function formatCurrency(value: number) {
+    return USDollar.format(value);
+}
+
+export function formatAmount(value: number) {
+    const _formatted = formatCurrency(value);
+    return value > 0? `+${_formatted}`: _formatted;
+}
 
 export function formatDate(dateString: string) {
     const date = new Date(dateString);

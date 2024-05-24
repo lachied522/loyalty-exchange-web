@@ -1,4 +1,4 @@
-import type { ClientData } from "@/utils/functions/clients";
+import type { ClientData } from "@/types/helpers";
 
 export type Action = {
     type: 'SET_DATA',

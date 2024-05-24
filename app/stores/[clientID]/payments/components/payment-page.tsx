@@ -2,14 +2,14 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
-import { type ClientState, useClientContext } from '../../context/ClientContext';
+import { type ClientIDState, useClientIDContext } from '../../context/ClientIDContext';
 
 import { handleCheckoutSuccess } from "../actions/sessions";
 
 import StripeEmbeddedCheckout from "./StripeEmbeddedCheckout";
 
 export default function PaymentPage() {
-    const { clientData } = useClientContext() as ClientState;
+    const { clientData } = useClientIDContext() as ClientIDState;
     const searchParams = useSearchParams();
 
     // once user has completed checkout session id will be added to search params

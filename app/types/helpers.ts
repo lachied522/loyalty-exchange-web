@@ -6,6 +6,10 @@ export type Reward = Tables<'rewards'>;
 
 export type ClientData = (
     Tables<'clients'> & {
-        stores: Tables<'stores'>[]
+        stores: (
+            Tables<'stores'> & {
+                rewards: Tables<'rewards'>[]
+            }
+        )[]
     }
 )
