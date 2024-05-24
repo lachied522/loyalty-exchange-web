@@ -1,6 +1,6 @@
 import { getBasiqServerAccessToken } from "./server";
 
-import type { Account } from "@/types/basiq";
+import type { Account, Job } from "@/types/basiq";
 
 export async function fetchUserConnections(
     BasiqUserId: string | null,
@@ -24,27 +24,19 @@ export async function fetchUserConnections(
     );
 
     if (!res.ok) {
-        console.log('error fetching user connections, status: ', res.status);
         return [];
     }
 
     return await res.json().then(({ data }) => data);
 }
 
-
 // see https://api.basiq.io/reference/refreshconnections-1
-type RefreshAllConnectionsResponse = {
-    type: 'job',
-    id: string, // job id
-    links: string[] // url to self
-}
-
-export async function refreshAllConnections(
+export async function refreshAllUserConnections(
     BasiqUserId: string | null,
     serverAccessToken?: string,
-): Promise<RefreshAllConnectionsResponse[]> {
-    // this function should not be called frequently
-    if (!BasiqUserId) return [];
+): Promise<Job | null> {
+    // NOTE: this function should not be called frequently
+    if (!BasiqUserId) return null;
 
     if (!serverAccessToken) {
         serverAccessToken = await getBasiqServerAccessToken();
@@ -53,7 +45,7 @@ export async function refreshAllConnections(
     const res = await fetch(
         `https://au-api.basiq.io/users/${BasiqUserId}/connections/refresh`,
         {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 'Authorization': `Bearer ${serverAccessToken}`,
                 'Accept': 'application/json',
@@ -62,8 +54,7 @@ export async function refreshAllConnections(
     );
 
     if (!res.ok) {
-        console.log('error refreshing user connections, status: ', res.status);
-        return [];
+        return null;
     }
 
     return await res.json().then(({ data }) => data);

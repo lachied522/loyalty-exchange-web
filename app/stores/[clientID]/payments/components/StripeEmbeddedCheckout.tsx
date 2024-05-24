@@ -28,7 +28,7 @@ export default function StripeEmbeddedCheckout() {
 
             isMounted = true;
         }
-    }, [setClientSecret]);
+    }, [setClientSecret, clientData]);
 
     return (
         <div className='min-w-[100vw] sm:p-12 p-6 bg-white'>

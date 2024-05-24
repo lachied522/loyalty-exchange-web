@@ -19,7 +19,7 @@ export default function PaymentPage() {
         if (checkoutSessionID) {
             handleCheckoutSuccess(clientData, checkoutSessionID);
         }
-    }, [checkoutSessionID]);
+    }, [clientData, checkoutSessionID]);
 
     return (
         <>
