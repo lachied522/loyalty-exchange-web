@@ -13,8 +13,8 @@ export async function fetchUserRecord(
     .eq('id', userID);
 
     if (error) {
-        console.log(error);
-        throw new Error(`Error fecthing user data ${error}`);
+        console.error(`Error fecthing user data ${error.message}`);
+        throw new Error(`Error fecthing user data ${error.message}`);
     };
 
     return data[0];
@@ -31,8 +31,8 @@ export async function fetchAllUserData(
     .eq('id', userID);
 
     if (error) {
-        console.log(error);
-        throw new Error(`Error fecthing user data ${error}`);
+        console.error(`Error fecthing user data ${error.message}`);
+        throw new Error(`Error fecthing user data ${error.message}`);
     };
 
     return data[0];
@@ -50,7 +50,7 @@ export async function fetchUserPointsRecordByStoreID(
     .eq('store_id', storeID);
 
     if (error) {
-        console.log('Error fetching user points record: ', error.message);
+        console.error('Error fetching user points record: ', error.message);
         return null;
     };
 
@@ -68,8 +68,8 @@ export async function updateUserRecord(
     .eq('id', userID); 
     
     if (error) {
-        console.log(`Error updating user record: `, error);
-        throw new Error(`Error updating user record ${error}`);
+        console.error(`Error updating user record: `, error.message);
+        throw new Error(`Error updating user record ${error.message}`);
     };
 }
 
@@ -82,8 +82,8 @@ export async function insertTransactions(
     .insert(records);
 
     if (error) {
-        console.log(`Error inserting transactions:`, error);
-        throw new Error(`Error inserting transactions ${error}`);
+        console.error(`Error inserting transactions:`, error.message);
+        throw new Error(`Error inserting transactions ${error.message}`);
     };
 }
 
@@ -96,8 +96,8 @@ export async function upsertPointsRecords(
     .upsert(records, { onConflict: 'user_id, store_id' });
 
     if (error) {
-        console.log(`Error updating points balance: `, error);
-        throw new Error(`Error updating points balance ${error}`);
+        console.error(`Error updating points balance: `, error.message);
+        throw new Error(`Error updating points balance ${error.message}`);
     };
 }
 
@@ -110,22 +110,22 @@ export async function insertRedeemedRecord(
     .insert(record);
 
     if (error) {
-        console.log(`Error updating reward: `, error);
+        console.error(`Error updating reward: `, error.message);
         throw new Error(`Error updating reward ${error.message}`);
     };
 }
 
-export async function deductFromStorePoints(
-    amount: number,
-    storeID: string,
+export async function deleteAllUserData(
     userID: string,
-    supabase: SupabaseClient
+    supabase: SupabaseClient<Database>
 ) {
     const { error } = await supabase
-    .rpc('deduct_store_balance', { amount, store_id: storeID, user_id: userID });
+    .from('users')
+    .delete()
+    .eq('id', userID);
 
     if (error) {
-        console.log(`Error deducting store balance:`, error);
-        throw new Error(`Error deducting store balance ${error.message}`);
-    }
+        console.error(`Error deleting user record: `, error.message);
+        throw new Error(`Error deleting user record ${error.message}`);
+    };
 }

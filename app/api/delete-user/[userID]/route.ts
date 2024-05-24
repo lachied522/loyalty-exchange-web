@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 
 import { isRequestAuthenticated } from '@/api/auth';
 
-import { deleteBasiqUser } from '@/utils/basiq/users';
+import { insertJobRecord } from '@/utils/crud/jobs';
 
 export async function GET(
     req: Request,
@@ -17,32 +17,24 @@ export async function GET(
     try {
         const supabase = createClient();
 
-        // 1. Fetch user record
-        const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('basiq_user_id')
-        .eq('id', params.userID);
+        // user deletion is delayed for 24 hours so that any final transactions made will be recorded
+        // create a 'job' record to delete user
+        await insertJobRecord(
+            {
+                job_type: 'delete-user',
+                user_id: params.userID,
+            },
+            supabase
+        );
 
-        // 2. Delete Basiq user
-        let isBasiqUserDeleted = true; // default to true, will be made false if below fails
-        if (userData && userData.length && userData[0].basiq_user_id) {
-            isBasiqUserDeleted = await deleteBasiqUser(userData[0].basiq_user_id);
-        }
-
-        // 3. Delete user from 'public' table
-        const { error: publicError } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', params.userID);
-
-        if (publicError) {
-            return Response.json({}, { status: 500 });
-        }
-
-        // 4. Delete user from 'auth' table
-        const { error: authError } = await supabase.auth.admin.deleteUser(params.userID);
+        // User cannot be deleted from auth table without a database violation
+        // We will instead ban the user account to prevent login before deletion
+        const { error: authError } = await supabase.auth.admin.updateUserById(params.userID, {
+            ban_duration: "876600h"
+        });
 
         if (authError) {
+            console.log({ authError });
             return Response.json({}, { status: authError.status });
         }
 
