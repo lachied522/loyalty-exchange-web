@@ -1,10 +1,12 @@
 "use client";
 import { useMemo } from "react";
 
+import { formatCurrency } from "@/utils/functions/formatting";
+
 import { type DashboardState, useDashboardContext } from "../context/DashboardContext";
 import { type StoreIDState, useStoreIDContext } from "../../context/StoreIDContext";
 
-import { formatCurrency } from "@/utils/functions/formatting";
+import RevenueChart from "./revenue-chart";
 
 export default function TotalRevenue() {
     const { storeData } = useStoreIDContext() as StoreIDState;
@@ -21,17 +23,19 @@ export default function TotalRevenue() {
     }, [customerData]);
 
     return (
-        <div className='flex items-start'>
-            <div className='flex flex-row items-center border border-neutral-200 px-5 py-3 gap-6 rounded-md'>
+        <div className='flex flex-col'>
+            <div className='flex flex-row items-center justify-between gap-6 mb-6'>
                 <div className='flex flex-col items-start gap-2'>
-                    <div className='text-xl font-semibold'>Total Revenue</div>
-                    <div>Since {new Date(storeData.created_at).toLocaleDateString()}</div>
+                    <div className='text-xl font-semibold'>Your Revenue</div>
                 </div>
 
-                <div className='text-xl font-semibold'>
-                    {formatCurrency(total)}
+                <div className='flex flex-row items-center gap-2'>
+                    <span>Total</span>
+                    <span className='text-xl font-semibold'>{formatCurrency(total)}</span>
                 </div>
             </div>
+
+            <RevenueChart />
         </div>
     )
 }

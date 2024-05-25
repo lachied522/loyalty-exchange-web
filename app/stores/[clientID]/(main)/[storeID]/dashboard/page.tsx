@@ -1,6 +1,6 @@
 import { Separator } from "@/components/ui/separator";
 
-import TotalRevenue from "./components/total-revenue";
+import Revenue from "./components/revenue";
 import TopCustomers from "./components/top-customers";
 import RecentTransactions from "./components/recent-transactions";
 import RecentRedemptions from "./components/recent-redemptions";
@@ -8,9 +8,10 @@ import RecentRedemptions from "./components/recent-redemptions";
 export default function DashboardPage() {
 
     return (
-        <div className='grid xl:grid-cols-2 grid-cols-1 xl:gap-6 gap-3 items-start p-6'>                
+        <div className='grid xl:grid-cols-2 grid-cols-1 items-start xl:gap-6 gap-3 p-6'>                
             <div className='col-span-2'>
-                <TotalRevenue />
+                <Revenue />                
+                <Separator className='my-12' />
             </div>
 
             <div className='xl:col-span-1 col-span-2 xl:mr-3'>
