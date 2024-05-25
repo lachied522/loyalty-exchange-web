@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/client";
 import { insertStoreRecord } from "@/utils/crud/stores";
 
+import { type ClientIDState, useClientIDContext } from "../../../context/ClientIDContext";
+
 const formSchema = z.object({
     name: z.string().min(2, 'Required').max(32),
     vendor_name: z.string().min(1, 'Required'),
@@ -30,11 +32,8 @@ const formSchema = z.object({
     postcode: z.string().min(1, 'Required'),
 })
 
-interface CreateStoreFormProps {
-    clientID: string
-}
-
-export default function CreateStoreForm({ clientID }: CreateStoreFormProps) {
+export default function CreateStoreForm() {
+    const { clientData, dispatch } = useClientIDContext() as ClientIDState;
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<boolean>(false);
     const form = useForm<z.infer<typeof formSchema>>({
@@ -47,12 +46,20 @@ export default function CreateStoreForm({ clientID }: CreateStoreFormProps) {
         setIsLoading(true);
 
         try {
+            // insert store record and update state
             const store = await insertStoreRecord(
-                { ...values, client_id: clientID },
+                { ...values, client_id: clientData.id },
                 createClient()
             );
 
-            router.replace(`/stores/${clientID}/${store.id}/customise`);
+            dispatch({
+                type: 'INSERT_NEW_STORE',
+                payload: {
+                    data: store,
+                }
+            })
+
+            router.replace(`/stores/${clientData.id}/${store.id}/customise`);
         } catch (e) {
             setError(true);
         }

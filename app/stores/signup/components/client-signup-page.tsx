@@ -24,18 +24,19 @@ async function clientSignup(
     name: string,
     email: string,
     password: string,
-    clientID: string | null
 ) {
     const supabase = createClient();
 
-    // 1. create auth user with 'client' role
+    // create auth user with 'client' role
     const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
             // emailRedirectTo: redirectTo,
             data: {
-              role: 'client',
+                role: 'client',
+                first_name: name,
+                last_name: ''
             }
           }
     });
@@ -45,41 +46,7 @@ async function clientSignup(
         return;
     }
 
-    if (clientID) {
-        // 2i. update auth_user_id in client record
-        const { error: clientError } = await supabase
-        .from('clients')
-        .update({
-            email,
-            name,
-            auth_user_id: authData.user.id,
-        })
-        .eq('id', clientID);
-
-        if (clientError) {
-            console.log({ clientError })
-            return;
-        }
-
-        return clientID;
-    } else {
-        // 2ii. create record in clients table and link to auth user
-        const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .insert({
-            email,
-            name,
-            auth_user_id: authData.user.id,
-        })
-        .select('id');
-
-        if (clientError) {
-            console.log({ clientError })
-            return;
-        }
-
-        return clientData[0].id;
-    }
+    return authData.user.id;
 }
 
 const formSchema = z.object({
@@ -93,8 +60,7 @@ const formSchema = z.object({
     path: ['passwordConfirm']
 });
 
-export default function CreatePasswordForm() {
-    const [clientID, setClientID] = useState<string | null>(null);
+export default function ClientSignUpPage() {
     const [email, setEmail] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<boolean>(false);
@@ -104,7 +70,7 @@ export default function CreatePasswordForm() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: "",
+            email: searchParams.get('email') || '',
             password: "",
             passwordConfirm: "",
         },
@@ -113,13 +79,8 @@ export default function CreatePasswordForm() {
     useEffect(() => {
         if (searchParams.get('email')) {
             setEmail(searchParams.get('email'));
-            form.setValue('email', searchParams.get('email')!);
         }
-
-        if (searchParams.get('client')) {
-            setClientID(searchParams.get('client'));
-        }
-    }, []);
+    }, [searchParams, setEmail]);
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
@@ -128,7 +89,6 @@ export default function CreatePasswordForm() {
             values.name,
             values.email,
             values.passwordConfirm,
-            clientID
         )
 
         if (!_clientID) {
@@ -141,7 +101,8 @@ export default function CreatePasswordForm() {
         if (redirectUrl) {
             router.replace(redirectUrl);
         } else {
-            router.replace(`/stores/${_clientID}`);
+            // redirect to payments
+            router.replace(`/stores/${_clientID}/payments`);
         }
     }
 

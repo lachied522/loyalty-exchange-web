@@ -42,7 +42,7 @@ export default function CustomiseContextProvider({ children }: CustomiseContextP
                 payload: { data, storeID },
             })
         },
-        [supabase, storeID]
+        [supabase, storeID, dispatch]
     );
 
     const insertRewardRecordAndUpdateState = useCallback(
@@ -54,7 +54,7 @@ export default function CustomiseContextProvider({ children }: CustomiseContextP
                 payload: { data: newRecord },
             })
         },
-        [supabase, storeID]
+        [supabase, storeID, dispatch]
     );
 
     const updateRewardRecordAndUpdateState = useCallback(
@@ -78,7 +78,7 @@ export default function CustomiseContextProvider({ children }: CustomiseContextP
                 payload: { rewardID },
             })
         },
-        [supabase]
+        [supabase, dispatch]
     );
 
     const uploadImageFromFile = useCallback(

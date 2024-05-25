@@ -18,6 +18,7 @@ export default function RecentTransactions() {
 
             for (const transaction of record.users!.transactions) {
                 _formattedData.push({
+                    id: record.user_id,
                     name,
                     date: transaction.date,
                     points: transaction.points,

@@ -19,6 +19,7 @@ export default function RecentRedemptions() {
 
             for (const redemption of record.users!.redeemed) {
                 _formattedData.push({
+                    id: record.user_id,
                     name,
                     date: redemption.redeemed_at,
                     title: redemption.rewards?.title || ''

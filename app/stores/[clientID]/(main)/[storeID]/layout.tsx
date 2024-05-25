@@ -22,7 +22,7 @@ export default function StoreIDLayout({
                 <Sidebar />
                 <div className='flex-1 xl:px-16 px-5 xl:py-8 py-3'>
                     {/* <Header /> */}
-                    <div className='flex flex-row items-center justify-between'>
+                    <div className='flex flex-col md:flex-row items-center justify-between gap-2'>
                         <Logo withText />
                         <Account />
                     </div>

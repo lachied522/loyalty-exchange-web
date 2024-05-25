@@ -4,6 +4,11 @@ export type Action = {
     type: 'SET_DATA',
     payload: ClientData
 } | {
+    type: 'INSERT_NEW_STORE',
+    payload: {
+        data: Omit<ClientData['stores'][number], 'rewards'>
+    }
+} | {
     type: 'UPDATE_STORE',
     payload: {
         data: Partial<ClientData['stores'][number]>
@@ -31,6 +36,19 @@ export function ClientReducer(state: ClientData, action: Action) {
     switch (action.type) {
         case 'SET_DATA': {
             return action.payload;
+        }
+
+        case 'INSERT_NEW_STORE': {
+            return {
+                ...state,
+                stores: [
+                    ...state.stores,
+                    {
+                        ...action.payload.data,
+                        rewards: []
+                    },
+                ]
+            }
         }
 
         case 'UPDATE_STORE': {

@@ -11,7 +11,6 @@ const PUBLISHABLE_KEY =
 let stripePromise: Promise<Stripe | null>;
 
 export default function getStripe(): Promise<Stripe | null> {
-  console.log(PUBLISHABLE_KEY);
   if (!stripePromise){
     stripePromise = loadStripe(PUBLISHABLE_KEY);
   }

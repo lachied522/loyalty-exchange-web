@@ -17,6 +17,9 @@ export const columns: ColumnDef<Customer>[] = [
   {
     accessorKey: "points",
     header: "Current Points Balance",
+    cell: ({ row }) => (
+      <div>{row.getValue('points')?.toLocaleString() || ''}</div>
+    )
   },
   {
     accessorKey: "dollarsSpent",

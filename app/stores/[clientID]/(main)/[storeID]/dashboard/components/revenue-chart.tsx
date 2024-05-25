@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -42,6 +42,19 @@ function formatXAxis(timestamp: string) {
 
 export default function RevenueChart() {
     const { customerData } = useDashboardContext() as DashboardState;
+    const [height, setHeight] = useState<number>(window.innerWidth > 1024? 440: 240)
+
+    useEffect(() => {
+        const handleResize = () => {
+            setHeight(window.innerWidth > 1024? 440: 240);
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize)
+        };
+    }, []);
 
     const data = useMemo(() => {
         if (!customerData) return [];
@@ -75,15 +88,15 @@ export default function RevenueChart() {
     return (
         <>
             {data.length ? (
-            <ResponsiveContainer height={440} width='100%' style={{ padding: 12 }}>
+            <ResponsiveContainer height={height} width='100%'>
                 <ComposedChart
                     width={500}
                     height={300}
                     data={data}
                     margin={{
                         top: 0,
-                        right: 30,
-                        left: 30,
+                        right: 20,
+                        left: 20,
                         bottom: 12,
                     }}
                 >

@@ -3,7 +3,7 @@ import Logo from "@/logo";
 
 import CreateStoreForm from "./components/create-store-form";
 
-export default async function Page({ params }: { params: { clientID: string } }) {
+export default async function Page() {
 
     return (
         
@@ -12,7 +12,7 @@ export default async function Page({ params }: { params: { clientID: string } })
                 <Logo withText />
                 <h1 className='md:text-4xl text-3xl font-semibold'>Tell us about your store.</h1>
                 
-                <CreateStoreForm clientID={params.clientID} />
+                <CreateStoreForm />
             </div>
         </main>
     )

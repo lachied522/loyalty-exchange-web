@@ -26,7 +26,7 @@ export default async function ClientIDLayout({ children, params }: ClientIDLayou
     }
 
     // check if logged in user belongs to this client
-    if (user.id !== clientData.auth_user_id) {
+    if (user.id !== clientData.auth_user_id || clientData.id) {
         redirect('/stores/login');
     }
 

@@ -26,7 +26,8 @@ export default function TopCustomers() {
             }
 
             _formattedData.push({
-                name: record.users?.name || 'n/a',
+                id: record.users!.id,
+                name: record.users!.name || 'n/a',
                 points: record.balance,
                 dollarsSpent,
                 lastPurchase,

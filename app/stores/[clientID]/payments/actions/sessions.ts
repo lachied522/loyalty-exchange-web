@@ -1,12 +1,11 @@
 "use server";
 import { headers } from "next/headers";
 
+import { stripe } from "@/utils/stripe/server";
 import type { Stripe } from "stripe";
 
 import { createClient } from "@/utils/supabase/server";
 import { updateClientStripeCustomerID } from "@/utils/crud/clients";
-
-import { stripe } from "@/utils/stripe/server";
 
 import type { ClientData } from "@/types/helpers";
 
@@ -36,7 +35,11 @@ export async function createCheckoutSession(
             clientData.stripe_customer_id ? {
                 customer: clientData.stripe_customer_id
             } : {
-                customer_email: clientData.email || ''
+                ...(
+                    clientData.email? {
+                        customer_email: clientData.email
+                    } : {}
+                )
             }
         ),
     });

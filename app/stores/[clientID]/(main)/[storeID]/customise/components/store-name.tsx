@@ -52,8 +52,8 @@ export default function StoreName() {
 
     return (
         <div className='flex flex-col items-stretch justify-between gap-4 p-6'>
-            <div className='flex flex-row items-end justify-between'>
-                <div className='flex flex-col gap-2'>
+            <div className='flex sm:flex-row flex-col items-start sm:items-end justify-between gap-2'>
+                <div className='flex flex-col sm:items-start gap-2'>
                     <div className='w-full flex flex-row items-center'>
                         <div className='text-xl font-semibold'>Store Name</div>
                     </div>

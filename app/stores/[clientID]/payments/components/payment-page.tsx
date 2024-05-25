@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 import { type ClientIDState, useClientIDContext } from '../../context/ClientIDContext';
 
@@ -11,23 +11,28 @@ import StripeEmbeddedCheckout from "./StripeEmbeddedCheckout";
 export default function PaymentPage() {
     const { clientData } = useClientIDContext() as ClientIDState;
     const searchParams = useSearchParams();
-
-    // once user has completed checkout session id will be added to search params
-    const checkoutSessionID = searchParams.get('session_id');
-
+    const router = useRouter();
+    
     useEffect(() => {
-        if (checkoutSessionID) {
-            handleCheckoutSuccess(clientData, checkoutSessionID);
+        // once user has completed checkout session id will be added to search params
+        const _checkoutSessionID = searchParams.get('session_id');
+        if (_checkoutSessionID) {
+            handleCheckoutSuccessAndRedirectUser(_checkoutSessionID);
         }
-    }, [checkoutSessionID, clientData]);
+
+        async function handleCheckoutSuccessAndRedirectUser(checkoutSessionID: string) {
+            await handleCheckoutSuccess(clientData, checkoutSessionID);
+            router.replace(`/stores/${clientData.id}`);
+        }
+    }, [searchParams, router, clientData]);
 
     return (
         <>
-            {checkoutSessionID ? (
-            <div className='w-full max-w-[960px] min-w-[360px] sm:p-12 p-6 bg-neutral-100'>
+            {searchParams.get('session_id') ? (
+            <div className='w-full max-w-[960px] min-w-[360px] sm:p-12 p-6 border border-neutral-100'>
                 <div className='flex flex-col items-center'>
                     <h4 className='text-lg font-medium'>Thank You</h4>
-                    <p>You may close this window.</p>
+                    <p>Please wait while we redirect you...</p>
                 </div>
             </div>
             ) : (

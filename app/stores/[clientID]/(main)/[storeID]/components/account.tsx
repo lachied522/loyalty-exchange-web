@@ -22,7 +22,7 @@ export default function Account() {
 
     return (
         <div className='flex lg:flex-row flex-col lg:items-center items-end lg:gap-3.5'>
-            <div className='text-sm'>
+            <div className='text-sm pr-5 lg:pr-0'>
                 Logged in as <span className='font-medium'>{clientData.name}</span>
             </div>
             <Button

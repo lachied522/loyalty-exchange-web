@@ -32,11 +32,11 @@ export default function RewardsTable<TData, TValue>({
     });
 
     return (
-        <div className="rounded-md border m-6">
+        <div className="rounded-md border m-6 overflow-hidden">
             <Table>
                 <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
+                    <TableRow key={headerGroup.id} className='bg-neutral-100 hover:bg-neutral-100'>
                     {headerGroup.headers.map((header) => {
                         return (
                         <TableHead key={header.id}>
