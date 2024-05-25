@@ -13,14 +13,12 @@ export default function DeleteAccountPage() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const router = useRouter();
 
-    const supabase = createClient();
-
     useEffect(() => {
         getUser();
 
         async function getUser() {
             if (user) return;
-
+            const supabase = createClient();
             const { data } = await supabase.auth.getUser();
 
             if (!data) {
@@ -29,7 +27,7 @@ export default function DeleteAccountPage() {
 
             setUser(data.user);
         }
-    }, [router, user, supabase.auth]);
+    }, [router, user]);
 
     const onDelete = async () => {
         if (!user) return;

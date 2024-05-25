@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
 
@@ -13,14 +13,25 @@ interface ClientIDLayoutProps {
 
 export default async function ClientIDLayout({ children, params }: ClientIDLayoutProps) {
     const supabase = createClient();
-    const data = await fetchClientByClientID(params.clientID, supabase);
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!data) {
+    if (!user) {
+        // user not logged in
+        redirect('/stores/login');
+    }
+
+    const clientData = await fetchClientByClientID(params.clientID, supabase);
+    if (!clientData) {
         notFound();
     }
 
+    // check if logged in user belongs to this client
+    if (user.id !== clientData.auth_user_id) {
+        redirect('/stores/login');
+    }
+
     return (
-        <ClientContextProvider initialState={data}>
+        <ClientContextProvider initialState={clientData}>
             {children}
         </ClientContextProvider>
     )

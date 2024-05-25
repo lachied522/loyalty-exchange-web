@@ -23,8 +23,8 @@ export default function TotalRevenue() {
     }, [customerData]);
 
     return (
-        <div className='flex flex-col'>
-            <div className='flex flex-row items-center justify-between gap-6 mb-6'>
+        <div className='flex flex-col p-2'>
+            <div className='flex flex-row items-center justify-between gap-6 px-12 mb-6'>
                 <div className='flex flex-col items-start gap-2'>
                     <div className='text-xl font-semibold'>Your Revenue</div>
                 </div>

@@ -29,8 +29,6 @@ export default function LoginForm() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    const supabase = createClient();
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -41,6 +39,8 @@ export default function LoginForm() {
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
+        
+        const supabase = createClient();
         const { data, error } = await supabase.auth.signInWithPassword({
             email: values.email,
             password: values.password

@@ -43,7 +43,6 @@ interface EditRewardFormProps {
 
 export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
     const {
-        selectedStoreData,
         insertRewardRecordAndUpdateState,
         updateRewardRecordAndUpdateState,
         uploadImageFromFile,

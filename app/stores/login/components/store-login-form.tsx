@@ -11,13 +11,50 @@ import { createClient } from "@/utils/supabase/client";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from '@/components/ui/input';
 import { Button } from "@/components/ui/button";
+
+
+async function clientLogin(
+    email: string,
+    password: string
+) {
+    const supabase = createClient();
+
+    const { data: { user }, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (authError) {
+        throw authError;
+    }
+
+    if (!user) {
+        throw new Error('Username or password incorrect');
+    }
+
+    // get client record
+    const { data: clientData, error: clientError } = await supabase
+    .from('clients')
+    .select('id, auth_user_id')
+    .eq('auth_user_id', user.id);
+
+    if (clientError) {
+        throw clientError;
+    }
+
+    if (!clientData) {
+        throw new Error('Something went wrong. Please try again later.');
+    }
+
+    return clientData[0];
+}
 
 const formSchema = z.object({
     email: z.string(),
@@ -29,8 +66,6 @@ export default function StoreLoginForm() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    const supabase = createClient();
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -41,22 +76,20 @@ export default function StoreLoginForm() {
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: values.email,
-            password: values.password
-        });
+        
+        try {
+            const clientData = await clientLogin(values.email, values.password);
 
-        if (error) {
-            console.log(error);
+            const redirectUrl = searchParams.get('redirect');
+            if (redirectUrl) {
+                router.replace(redirectUrl)
+            } else {
+                router.replace(`/stores/${clientData.id}`);
+            }
+        } catch (error) {
+            console.log({ error });
+            form.setError('password', { message: 'Could not login. Please try again later.' });
             setIsLoading(false);
-            return;
-        }
-
-        const redirectUrl = searchParams.get('redirect');
-        if (redirectUrl) {
-            router.replace(redirectUrl)
-        } else {
-            router.replace('/'); // TO DO: redirect to account page
         }
     }
 
@@ -72,10 +105,11 @@ export default function StoreLoginForm() {
                             <FormControl>
                                 <Input {...field} />
                             </FormControl>
-                            <FormDescription />
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name="password"
@@ -85,12 +119,16 @@ export default function StoreLoginForm() {
                         <FormControl>
                             <Input type="password" {...field} />
                         </FormControl>
-                        <FormDescription />
+                        <FormMessage />
                     </FormItem>
                     )}
                 />
-                <Button type="submit" disabled={isLoading} className='font-bold' onClick={() => console.log(form.formState.errors)}>
-                    Login
+                <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className='font-bold'
+                >
+                    {isLoading? 'Loading...': 'Login'}
                 </Button>
             </form>
         </Form>

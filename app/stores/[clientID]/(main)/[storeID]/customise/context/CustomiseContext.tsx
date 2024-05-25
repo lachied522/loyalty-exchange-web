@@ -7,19 +7,15 @@ import { upsertRewardRecord, deleteReward } from "@/utils/crud/rewards";
 import { uploadImage } from "../actions/upload-image";
 
 import { type ClientIDState, useClientIDContext } from "../../../../context/ClientIDContext";
+import { type StoreIDState, useStoreIDContext } from "../../context/StoreIDContext";
 
 import type { Tables, TablesInsert, TablesUpdate } from "@/types/supabase";
 
 export type CustomiseState = {
-    selectedStoreID: string
-    selectedStoreData: ClientIDState['clientData']['stores'][number]
-    setSelectedStoreID: React.Dispatch<React.SetStateAction<string>>
-
     updateStoreRecordAndUpdateState: (data: TablesUpdate<'stores'>) => Promise<void>
     insertRewardRecordAndUpdateState: (data: Omit<TablesInsert<'rewards'>, 'id'|'store_id'>) => Promise<void>
     updateRewardRecordAndUpdateState: (data: TablesUpdate<'rewards'>) => Promise<void>
     deleteRewardRecordAndUpdateState: (rewardID: string) => Promise<void>
-    
     uploadImageFromFile: (file: File, bucket: 'stores'|'rewards'|'logos') => Promise<string | undefined>
 }
 
@@ -34,35 +30,31 @@ interface CustomiseContextProviderProps {
 }
 
 export default function CustomiseContextProvider({ children }: CustomiseContextProviderProps) {
-    const { supabase, clientData, dispatch } = useClientIDContext() as ClientIDState;
-    const [selectedStoreID, setSelectedStoreID] = useState<string>(clientData.stores[0].id);
-
-    const selectedStoreData = useMemo(() => {
-        return clientData.stores.find((store) => store.id === selectedStoreID);
-    }, [selectedStoreID, clientData]);
+    const { supabase, dispatch } = useClientIDContext() as ClientIDState;
+    const { storeID, storeData } = useStoreIDContext() as StoreIDState;
 
     const updateStoreRecordAndUpdateState = useCallback(
         async (data: TablesUpdate<'stores'>) => {
-            await updateStoreRecord(data, selectedStoreID, supabase);
+            await updateStoreRecord(data, storeID, supabase);
 
             dispatch({
                 type: 'UPDATE_STORE',
-                payload: { data, storeID: selectedStoreID },
+                payload: { data, storeID },
             })
         },
-        [supabase, selectedStoreID]
+        [supabase, storeID]
     );
 
     const insertRewardRecordAndUpdateState = useCallback(
         async (data: Omit<TablesInsert<'rewards'>, 'id'|'store_id'>) => {
-            const newRecord = await upsertRewardRecord({ ...data, store_id: selectedStoreID }, supabase);
+            const newRecord = await upsertRewardRecord({ ...data, store_id: storeID }, supabase);
 
             dispatch({
                 type: 'INSERT_NEW_REWARD',
                 payload: { data: newRecord },
             })
         },
-        [supabase, selectedStoreID]
+        [supabase, storeID]
     );
 
     const updateRewardRecordAndUpdateState = useCallback(
@@ -74,7 +66,7 @@ export default function CustomiseContextProvider({ children }: CustomiseContextP
                 payload: { data, rewardID: data.id },
             })
         },
-        [supabase, selectedStoreID]
+        [supabase]
     );
 
     const deleteRewardRecordAndUpdateState = useCallback(
@@ -86,7 +78,7 @@ export default function CustomiseContextProvider({ children }: CustomiseContextP
                 payload: { rewardID },
             })
         },
-        [supabase, selectedStoreID]
+        [supabase]
     );
 
     const uploadImageFromFile = useCallback(
@@ -95,20 +87,17 @@ export default function CustomiseContextProvider({ children }: CustomiseContextP
             formData.set('image', file);
 
             return await uploadImage(
-                selectedStoreID + '_image',
+                storeID + '_image',
                 formData,
                 bucket
             );
         },
-        [selectedStoreID]
+        [storeID]
     );
 
     return (
         <CustomiseContext.Provider
             value={{
-                selectedStoreID,
-                selectedStoreData,
-                setSelectedStoreID,
                 updateStoreRecordAndUpdateState,
                 insertRewardRecordAndUpdateState,
                 updateRewardRecordAndUpdateState,

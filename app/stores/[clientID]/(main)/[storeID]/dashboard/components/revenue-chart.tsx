@@ -7,6 +7,21 @@ import { formatCurrency } from '@/utils/functions/formatting';
 
 import { type DashboardState, useDashboardContext } from "../context/DashboardContext";
 
+function createEmptyDateMap() {
+    // want labels for last 12 months to appear on XAxis
+    // create empty data for this effect
+    const date = new Date();
+    date.setDate(1); // set to first of month
+
+    const dateMap: { [key: string]: { amount: number, count: number } } = {};
+    for (let i = 0; i < 12; i++) {
+        dateMap[date.getTime()] = { amount: 0, count: 0};
+        date.setMonth(date.getMonth() - 1);
+      }
+    
+    return dateMap;
+}
+
 const domain = () => {
     // want domain to be last 12 months
     const lastYear = new Date();
@@ -20,9 +35,9 @@ const domain = () => {
 }
 
 function formatXAxis(timestamp: string) {
-    const date = new Date(parseFloat(timestamp));
+    const date = new Date(Number(timestamp));
     const options: Intl.DateTimeFormatOptions = { month: 'short', year: '2-digit' };
-    return new Intl.DateTimeFormat('en-US', options).format(date);
+    return  new Intl.DateTimeFormat('en-US', options).format(date);
 }
 
 export default function RevenueChart() {
@@ -32,7 +47,7 @@ export default function RevenueChart() {
         if (!customerData) return [];
 
         // map date to amount spent by customers (amount) and number of rewards redeemed (count)
-        const dateMap: { [key: string]: { amount: number, count: number } } = {};
+        const dateMap = createEmptyDateMap();
         for (const record of customerData) {
             for (const transaction of record.users!.transactions) {
                 const timestamp = new Date(transaction.date).setHours(0, 0, 0, 0); // round to nearest day                
@@ -66,10 +81,10 @@ export default function RevenueChart() {
                     height={300}
                     data={data}
                     margin={{
-                        top: 5,
+                        top: 0,
                         right: 30,
                         left: 30,
-                        bottom: 5,
+                        bottom: 12,
                     }}
                 >
                     <CartesianGrid strokeDasharray="3 3" />
@@ -79,6 +94,9 @@ export default function RevenueChart() {
                         dataKey="timestamp"
                         domain={domain()}
                         tickFormatter={(timestamp: string) => formatXAxis(timestamp)}
+                        tickCount={11}
+                        minTickGap={31}
+                        interval='preserveStart'
                     />
                     <YAxis
                         yAxisId="left"
@@ -96,7 +114,6 @@ export default function RevenueChart() {
                         type="monotone"
                         dataKey="amount"
                         stroke="rgb(74 222 128)"
-                        
                         isAnimationActive={false}
                     />
                     <Bar 

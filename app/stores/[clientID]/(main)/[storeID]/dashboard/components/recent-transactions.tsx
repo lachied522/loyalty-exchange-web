@@ -1,7 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
-
-import { Card, CardContent } from "@/components/ui/card";
+import { useMemo } from "react";
 
 import { type DashboardState, useDashboardContext } from "../context/DashboardContext";
 
@@ -15,7 +13,6 @@ export default function RecentTransactions() {
         if (!customerData) return [];
 
         const _formattedData = [];
-        
         for (const record of customerData) {
             const name = record.users?.name || 'n/a';
 

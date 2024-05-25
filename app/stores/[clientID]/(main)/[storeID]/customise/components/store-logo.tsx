@@ -3,15 +3,17 @@ import { useState } from "react";
 
 import { Pencil } from "lucide-react";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 import { type CustomiseState, useCustomiseContext } from "../context/CustomiseContext";
+import { type StoreIDState, useStoreIDContext } from "../../context/StoreIDContext";
+
 import ImageUploader from "./image-uploader";
 
 export default function StoreLogo() {
-    const { selectedStoreData, updateStoreRecordAndUpdateState, uploadImageFromFile } = useCustomiseContext() as CustomiseState;
-    const [imageURL, setImageURL] = useState<string | null>(selectedStoreData.store_logo_url);
+    const { storeData } = useStoreIDContext() as StoreIDState;
+    const { updateStoreRecordAndUpdateState, uploadImageFromFile } = useCustomiseContext() as CustomiseState;
+    const [imageURL, setImageURL] = useState<string | null>(storeData.store_logo_url);
     const [imageFile, setImageFile] = useState<File | null>(null); // any files uploading must be stored in state
     const [isEditting, setIsEditting] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -42,22 +44,16 @@ export default function StoreLogo() {
     }
     
     return (
-        <Card>
-            <CardContent className='flex flex-col items-stretch justify-between gap-4 p-6'>
-                <div className='w-full flex flex-row items-center'>
-                    <div className='text-xl font-semibold'>Your Logo</div>
+        <div className='flex flex-col items-stretch justify-between gap-4 p-6'>
+            <div className='flex flex-row items-end justify-between gap-2'>
+                <div className='flex flex-col gap-2'>
+                    <div className='w-full flex flex-row items-center'>
+                        <div className='text-xl font-semibold'>Your Logo</div>
+                    </div>
+                    <p>Let customers know who you are. Upload your logo.</p>
                 </div>
-                <p>Let customers know who you are. Upload your logo.</p>
 
-                <ImageUploader
-                    alt='Your Store Logo'
-                    bucket='logos'
-                    value={imageURL}
-                    onChangeURL={(url: string) => setImageURL(url)}
-                    onChangeFile={(file: File) => setImageFile(file)}
-                />
-
-                <div className='w-full flex justify-end'>
+                <>
                     {isLoading? (
                     <Button
                         type='button'
@@ -89,8 +85,16 @@ export default function StoreLogo() {
                         )}
                     </>
                     )}
-                </div>
-            </CardContent>
-        </Card>
+                </>
+            </div>
+
+            <ImageUploader
+                alt='Your Store Logo'
+                bucket='logos'
+                value={imageURL}
+                onChangeURL={(url: string) => setImageURL(url)}
+                onChangeFile={(file: File) => setImageFile(file)}
+            />
+        </div>
     )
 }
