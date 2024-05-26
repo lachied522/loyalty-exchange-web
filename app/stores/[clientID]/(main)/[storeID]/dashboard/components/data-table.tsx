@@ -71,11 +71,8 @@ export default function DataTable<TData, TValue>({
                     <TableBody>
                     {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
-                        <CustomerDialog {...row.original}>
-                            <TableRow
-                                key={row.id}
-                                data-state={row.getIsSelected() && "selected"}
-                            >
+                        <CustomerDialog key={row.id} {...row.original}>
+                            <TableRow data-state={row.getIsSelected() && "selected"}>
                                 {row.getVisibleCells().map((cell) => (
                                 <TableCell key={cell.id}>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

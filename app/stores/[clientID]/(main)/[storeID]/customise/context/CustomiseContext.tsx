@@ -66,7 +66,7 @@ export default function CustomiseContextProvider({ children }: CustomiseContextP
                 payload: { data, rewardID: data.id },
             })
         },
-        [supabase]
+        [supabase, dispatch]
     );
 
     const deleteRewardRecordAndUpdateState = useCallback(
