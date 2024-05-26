@@ -1,10 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 
-import Logo from '@/logo';
-
-import Sidebar from "./components/sidebar";
 import StoreIDContextProvider from "./context/StoreIDContext";
-import Account from "./components/account";
+import Sidebar from "./components/sidebar";
+import Header from "./components/header";
 
 interface StoreIDLayoutProps {
     children: React.ReactNode
@@ -21,11 +19,7 @@ export default function StoreIDLayout({
             <main className='min-h-screen flex flex-row bg-neutral-50'>
                 <Sidebar />
                 <div className='flex-1 xl:px-16 px-5 xl:py-8 py-3'>
-                    {/* <Header /> */}
-                    <div className='flex flex-col md:flex-row items-center justify-between gap-2'>
-                        <Logo withText />
-                        <Account />
-                    </div>
+                    <Header />
                     <Card className='mt-6'>
                         <CardContent className='p-2'>
                             {children}

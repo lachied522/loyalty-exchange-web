@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
 
@@ -15,19 +15,19 @@ export default async function ClientIDLayout({ children, params }: ClientIDLayou
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (!(user && user.id === params.clientID)) {
         // user not logged in
+        redirect('/stores/login');
+    }
+
+    if (user.user_metadata['role'] !== 'client') {
+        // user not set up as client
         redirect('/stores/login');
     }
 
     const clientData = await fetchClientByClientID(params.clientID, supabase);
     if (!clientData) {
-        notFound();
-    }
-
-    // check if logged in user belongs to this client
-    if (user.id !== clientData.auth_user_id || clientData.id) {
-        redirect('/stores/login');
+        redirect('/stores/signup');
     }
 
     return (

@@ -32,14 +32,14 @@ export default function ImageUploader({
     }
     
     return (
-        <div className='flex flex-col items-center gap-6'>
+        <div className='flex flex-col items-center gap-6 p-6'>
             {value ? (
             <div className='h-[240px] flex items-center relative'>
                 <Image
                     src={value}
                     alt={alt}
                     height={240}
-                    width={360}
+                    width={380}
                     style={{ borderRadius: 12 }}
                 />
             </div>

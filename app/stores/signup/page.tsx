@@ -25,7 +25,12 @@ export default async function Page() {
         <main className='h-[100vh] flex items-center justify-center bg-yellow-100 p-12'>
             <div className='h-full flex flex-col items-center gap-12'>
                 <Logo withText />
-                <h1 className='md:text-4xl text-3xl font-semibold'>Welcome!</h1>
+
+                <div className='flex flex-col items-center gap-1'>
+                    <h1 className='md:text-4xl text-3xl font-semibold'>Store Signup</h1>
+                    <h4 className='text-lg font-medium'>Welcome!</h4>
+                </div>
+
                 <Suspense fallback={<FormPlaceholder />}>
                     <ClientSignupPage />
                 </Suspense>

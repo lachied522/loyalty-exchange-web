@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -20,37 +21,45 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from "@/components/ui/button";
 
-async function clientSignup(
-    name: string,
-    email: string,
-    password: string,
-) {
+async function clientSignup({
+    first_name,
+    last_name,
+    email,
+    mobile,
+    password,
+}: z.infer<typeof formSchema>) {
     const supabase = createClient();
 
     // create auth user with 'client' role
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    const { data: { user }, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
             // emailRedirectTo: redirectTo,
             data: {
                 role: 'client',
-                first_name: name,
-                last_name: ''
+                first_name,
+                last_name,
+                mobile,
             }
           }
-    });
+    })
 
-    if (authError || !authData.user) {
-        console.log({ authError });
-        return;
+    if (authError) {
+        throw authError;
     }
 
-    return authData.user.id;
+    if (!user) {
+        throw new Error('Something went wrong. Please try again later.');
+    }
+
+    return user.id;
 }
 
 const formSchema = z.object({
-    name: z.string().min(1, 'Required'),
+    first_name: z.string().min(1, 'Required'),
+    last_name: z.string().min(1, 'Required'),
+    mobile: z.string().min(1, 'Required'),
     email: z.string().min(1, 'Required'),
     password: z.string().min(6, 'Password must be 6 characters long'),
     passwordConfirm: z.string(),
@@ -63,13 +72,15 @@ const formSchema = z.object({
 export default function ClientSignUpPage() {
     const [email, setEmail] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [error, setError] = useState<boolean>(false);
     const searchParams = useSearchParams();
     const router = useRouter();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            first_name: '',
+            last_name: '',
+            mobile: '',
             email: searchParams.get('email') || '',
             password: "",
             passwordConfirm: "",
@@ -85,24 +96,19 @@ export default function ClientSignUpPage() {
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
 
-        const _clientID = await clientSignup(
-            values.name,
-            values.email,
-            values.passwordConfirm,
-        )
-
-        if (!_clientID) {
-            setError(true);
+        try {
+            const clientID = await clientSignup(values);
+    
+            const redirectUrl = searchParams.get('redirect');
+            if (redirectUrl) {
+                router.replace(redirectUrl);
+            } else {
+                // redirect to payments
+                router.replace(`/stores/${clientID}/payments`);
+            }
+        } catch (error: any) {
+            form.setError('passwordConfirm', { message: error.message || 'Could not login. Please try again later.' });
             setIsLoading(false);
-            return;
-        }
-
-        const redirectUrl = searchParams.get('redirect');
-        if (redirectUrl) {
-            router.replace(redirectUrl);
-        } else {
-            // redirect to payments
-            router.replace(`/stores/${_clientID}/payments`);
         }
     }
 
@@ -111,10 +117,24 @@ export default function ClientSignUpPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className='md:w-[360px] w-[240px] flex flex-col items-stretch gap-2'>
                 <FormField
                     control={form.control}
-                    name="name"
+                    name="first_name"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>First Name</FormLabel>
+                            <FormControl>
+                                <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="last_name"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Last Name</FormLabel>
                             <FormControl>
                                 <Input {...field} />
                             </FormControl>
@@ -140,6 +160,20 @@ export default function ClientSignUpPage() {
 
                 <FormField
                     control={form.control}
+                    name="mobile"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Contact Mobile</FormLabel>
+                            <FormControl>
+                                <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
                     name="password"
                     render={({ field }) => (
                     <FormItem>
@@ -157,7 +191,7 @@ export default function ClientSignUpPage() {
                     name="passwordConfirm"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel>Confirm Password</FormLabel>
                         <FormControl>
                             <Input type="password" {...field} />
                         </FormControl>
@@ -165,6 +199,7 @@ export default function ClientSignUpPage() {
                     </FormItem>
                     )}
                 />
+
                 <Button
                     type="submit"
                     disabled={isLoading}
@@ -172,6 +207,11 @@ export default function ClientSignUpPage() {
                 >
                     {isLoading? 'Please wait...': 'Signup'}
                 </Button>
+
+                <div className='flex flex-row justify-between text-base mt-2'>
+                    Already have an account?
+                    <Link href='/stores/login' className='text-blue-400 underline'>Login</Link>
+                </div>
             </form>
         </Form>
     )

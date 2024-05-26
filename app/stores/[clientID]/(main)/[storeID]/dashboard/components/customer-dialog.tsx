@@ -108,7 +108,7 @@ export default function CustomerDialog({ id, children }: CustomerDialogProps) {
                                 {customer.redeemed.map((obj) => (
                                 <TableRow key={`customer-redemption-${obj.id}`}>
                                     <TableCell>{formatDate(obj.redeemed_at)}</TableCell>
-                                    <TableCell className='text-green-400'>{obj.rewards?.title}</TableCell>
+                                    <TableCell>{obj.rewards?.title}</TableCell>
                                 </TableRow>
                                 ))}
                             </TableBody>

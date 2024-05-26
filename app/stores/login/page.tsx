@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 
 import Logo from "@/logo";
-import StoreLoginForm from "./components/store-login-form";
+import ClientLoginForm from "./components/client-login-form";
 
 function FormPlaceholder() {
     return (
@@ -18,16 +18,21 @@ function FormPlaceholder() {
     )
 }
 
-export default function StoreLoginPage() {
+export default function ClientLoginPage() {
     // form should be wrapped in suspense boundary to improve speed of initial render
     
     return (
         <main className='h-[100vh] flex items-center justify-center bg-yellow-100 p-12'>
             <div className='h-full flex flex-col items-center gap-12'>
                 <Logo withText />
-                <h1 className='md:text-4xl text-3xl font-semibold'>Store Login</h1>
+
+                <div className='flex flex-col items-center gap-1'>
+                    <h1 className='md:text-4xl text-3xl font-semibold'>Store Login</h1>
+                    <h4 className='text-lg font-medium'>Welcome back!</h4>
+                </div>
+
                 <Suspense fallback={<FormPlaceholder />}>
-                    <StoreLoginForm />
+                    <ClientLoginForm />
                 </Suspense>
             </div>
         </main>

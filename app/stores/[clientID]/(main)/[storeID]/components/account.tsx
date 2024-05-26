@@ -21,8 +21,8 @@ export default function Account() {
     }
 
     return (
-        <div className='flex lg:flex-row flex-col lg:items-center items-end lg:gap-3.5'>
-            <div className='text-sm pr-5 lg:pr-0'>
+        <div className='flex flex-row items-center gap-1'>
+            <div className='text-sm'>
                 Logged in as <span className='font-medium'>{clientData.name}</span>
             </div>
             <Button

@@ -1,13 +1,33 @@
 "use client";
-import { type ClientIDState, useClientIDContext } from "../../../context/ClientIDContext";
+import { Menu } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import Logo from "@/logo";
+
+import { type StoreIDState, useStoreIDContext } from "../context/StoreIDContext";
+import Account from "./account";
 
 export default function Header() {
-    const { clientData } = useClientIDContext() as ClientIDState;
+    const { isMobile, setIsSidebarOpenOnMobile } = useStoreIDContext() as StoreIDState;
+
+    const onMenuClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        setIsSidebarOpenOnMobile(true);
+    }
 
     return (
-        <div className='w-full px-6 py-6'>
-            <div className='flex flex-row items-center justify-center gap-2'>
-                <h3 className='font-semibold text-xl'>Welcome <span className='font-normal text-base'>{clientData.name}</span></h3>
+        <div className='flex flex-row items-center justify-between gap-2 pt-2'>
+            {isMobile && (
+                <Button
+                    variant='ghost'
+                    onClick={onMenuClick}
+                >
+                    <Menu size={32} />
+                </Button>
+            )}
+            <div className='w-full flex flex-col md:flex-row items-end md:items-center justify-between'>
+                <Logo withText />
+                <Account />
             </div>
         </div>
     )

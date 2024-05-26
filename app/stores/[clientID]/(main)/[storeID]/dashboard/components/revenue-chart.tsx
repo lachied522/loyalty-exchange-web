@@ -42,12 +42,14 @@ function formatXAxis(timestamp: string) {
 
 export default function RevenueChart() {
     const { customerData } = useDashboardContext() as DashboardState;
-    const [height, setHeight] = useState<number>(window.innerWidth > 1024? 440: 240)
+    const [height, setHeight] = useState<number>();
 
     useEffect(() => {
         const handleResize = () => {
             setHeight(window.innerWidth > 1024? 440: 240);
         };
+
+        handleResize();
 
         window.addEventListener('resize', handleResize);
 
