@@ -30,3 +30,46 @@ export type Account = {
     connection: string // id of the 'connection' resource
     class: 'transaction'|'savings'|'credit-card'|'mortgage'|'loan'|'investment'
 }
+
+// see https://api.basiq.io/reference/getjobs
+export type Job = {
+    type: string
+    id: string
+    created: string // date & time job was created
+    updated: string // data & time job was last updated
+    steps: {
+        title: 'verify-credentials'|'retrieve-accounts'|'retrieve-transactions'|'retrieve-statements'
+        status: 'success'|'pending'|'failed'|'in-progress'
+        result: {
+            title: string
+            type: string
+            url: string // url of resource
+            detail: string
+        } | null
+    }[]
+    links: {
+        self: string
+        source: string
+    }
+}
+
+// see https://api.basiq.io/reference/getconnection-1
+export type Connection = {
+    type: 'connection'
+    id: string
+    status: 'active'|'pending'|'invalid'
+    method: string // indicates web or Open Banking
+    createdDate: string // date connection was created
+    expiryDate: string // date connection expires
+    lastUsed: string // UTC date and time connection last used
+    accounts: Account[]
+    instition: {
+        id: string
+    }
+    links: {
+        self: string
+        accounts: string
+        transactions: string
+        user: string
+    }
+}

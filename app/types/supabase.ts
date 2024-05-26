@@ -49,27 +49,38 @@ export type Database = {
       }
       jobs: {
         Row: {
-          created: string
+          created_at: string
+          details: Json | null
           id: number
           job_id: string | null
-          jobType: string | null
-          steps: Json | null
+          job_type: Database["public"]["Enums"]["job_type"] | null
+          user_id: string | null
         }
         Insert: {
-          created?: string
+          created_at?: string
+          details?: Json | null
           id?: number
           job_id?: string | null
-          jobType?: string | null
-          steps?: Json | null
+          job_type?: Database["public"]["Enums"]["job_type"] | null
+          user_id?: string | null
         }
         Update: {
-          created?: string
+          created_at?: string
+          details?: Json | null
           id?: number
           job_id?: string | null
-          jobType?: string | null
-          steps?: Json | null
+          job_type?: Database["public"]["Enums"]["job_type"] | null
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "jobs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       points: {
         Row: {
@@ -380,6 +391,7 @@ export type Database = {
       }
     }
     Enums: {
+      job_type: "delete-user" | "refresh-data" | "connect"
       reward_type: "free_item" | "discount" | "promo_code"
     }
     CompositeTypes: {

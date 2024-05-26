@@ -3,6 +3,10 @@
       {
         "path": "/api/refresh-all-users",
         "schedule": "0 1 * * *"
+      },
+      {
+        "path": "/api/handle-outstanding-jobs",
+        "schedule": "0 3 * * *"
       }
     ]
 }

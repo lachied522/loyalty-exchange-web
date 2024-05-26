@@ -178,13 +178,10 @@ export async function refreshUserData(
             userHasNewData = true;
         };
 
-        // update last_updated column and return false
-        // await updateUserLastUpdated(userID, supabase);
-
+        await updateUserLastUpdated(userID, supabase);
         return userHasNewData;
     } catch (e) {
-        console.log(`Error refreshing data for user ${userID}: `, e);
+        console.error(`Error refreshing data for user ${userID}: `, e);
         return false;
     }
 }
-

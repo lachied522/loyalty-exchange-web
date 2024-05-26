@@ -1,6 +1,8 @@
 import { createClient } from '@/utils/supabase/server';
-import { deleteBasiqUser } from '@/utils/basiq/users';
+
 import { isRequestAuthenticated } from '@/api/auth';
+
+import { insertJobRecord } from '@/utils/crud/jobs';
 
 export async function GET(
     req: Request,
@@ -12,29 +14,33 @@ export async function GET(
         return Response.json({} , { status: 401 })
     }
 
-    const supabase = createClient();
-
     try {
-        // fetch user record
-        const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('basiq_user_id')
-        .eq('id', params.userID);
+        const supabase = createClient();
 
-        // delete user in Basiq API
-        if (userData && userData[0].basiq_user_id) {
-            deleteBasiqUser(userData[0].basiq_user_id);
+        // user deletion is delayed for 24 hours so that any final transactions made will be recorded
+        // create a 'job' record to delete user
+        await insertJobRecord(
+            {
+                job_type: 'delete-user',
+                user_id: params.userID,
+            },
+            supabase
+        );
+
+        // User cannot be deleted from auth table without a database violation
+        // We will instead ban the user account to prevent login before deletion
+        const { error: authError } = await supabase.auth.admin.updateUserById(params.userID, {
+            ban_duration: "876600h"
+        });
+
+        if (authError) {
+            console.log({ authError });
+            return Response.json({}, { status: authError.status });
         }
 
-        const { data, error } = await supabase.auth.admin.deleteUser(params.userID);
-
-        if (error) {
-            throw error;
-        }
-
-        return Response.json(data);
-    } catch (error) {
+        return Response.json({} ,{ status: 200 });
+    } catch (error: any) {
         console.log('Error deleting user: ', error);
-        return Response.json({ error }, { status: 500 });
+        return Response.json({}, { status: 500 });
     }
 }
