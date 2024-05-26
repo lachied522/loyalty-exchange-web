@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import { SupabaseClient, type User } from "@supabase/supabase-js";
 
 import { Button } from "@/components/ui/button";
 
 import Logo from "@/logo";
 
 export default function DeleteAccountPage() {
+    const [supabaseClient, setSupabaseClient] = useState<SupabaseClient>(createClient());
     const [user, setUser] = useState<User | null>()
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const router = useRouter();
@@ -19,8 +20,7 @@ export default function DeleteAccountPage() {
 
         async function getUser() {
             if (user) return;
-            const supabase = createClient();
-            const { data } = await supabase.auth.getUser();
+            const { data } = await supabaseClient.auth.getUser();
 
             if (!data.user) {
                 router.replace('/login?redirect=delete-account');
@@ -28,7 +28,7 @@ export default function DeleteAccountPage() {
                 setUser(data.user);
             }
         }
-    }, [router, user]);
+    }, [router, user, supabaseClient]);
 
     const onDelete = async () => {
         if (!user) return;
@@ -36,7 +36,7 @@ export default function DeleteAccountPage() {
 
         await fetch(`/api/delete-user/${user.id}`);
         // sign out user
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
         // navigate to home page
         router.replace('/');
     }
