@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 
 import { type ClientIDState, useClientIDContext } from '../../context/ClientIDContext';
 
-import { handleCheckoutSuccess } from "../actions/sessions";
+import { handleCheckoutSuccess } from "../../actions/checkout-session";
 
 import StripeEmbeddedCheckout from "./StripeEmbeddedCheckout";
 

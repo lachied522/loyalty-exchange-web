@@ -9,7 +9,7 @@ import getStripe from '@/utils/stripe/client';
 
 import { type ClientIDState, useClientIDContext } from '../../context/ClientIDContext';
 
-import { createCheckoutSession } from '../actions/sessions';
+import { createCheckoutSession } from '../../actions/checkout-session';
 
 export default function StripeEmbeddedCheckout() {
     const { clientData } = useClientIDContext() as ClientIDState;
