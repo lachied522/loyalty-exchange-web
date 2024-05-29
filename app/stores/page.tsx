@@ -14,7 +14,7 @@ import GetStartedButton from "./components/get-started-button";
 export default function StorePage() {
 
     return (
-        <main className=''>
+        <main className='scrollbar-custom'>
             <section className='bg-yellow-100 pb-24'>
                 <div className='w-full flex flex-row justify-between py-4 px-6'>
                     <Logo withText={true} />
@@ -24,7 +24,7 @@ export default function StorePage() {
                     </Link>
                 </div>
 
-                <div className='min-h-[540px] md:min-h-[720px] flex justify-center items-center sm:p-24 p-12'>
+                <div className='h-[60vh] min-h-[540px] flex justify-center items-center sm:p-24 p-12'>
                     <div className='max-w-[720px] flex flex-col gap-6'>
                         <h3 className='text-xl'>Ready to ignite your customer loyalty with Loyalty exchange?</h3>
 
@@ -65,7 +65,7 @@ export default function StorePage() {
                     </div>
 
                     <p className='max-w-[640px] text-xl font-medium text-center mb-12'>
-                        Access our existing network of loyal customers through our online dashboard. Launch your loyalty program in 4 easy steps.
+                        Access our existing network of loyal customers through our online dashboard. Launch your loyalty program in 3 easy steps.
                     </p>
                 </div>
 
@@ -108,7 +108,7 @@ export default function StorePage() {
                                     <p className='text-lg'>
                                         Invite your customers to foster a relationship with you and your business.
                                         <br /> <br />
-                                        Implement free in-store signage and custom social media campagaigns to promote your new program.
+                                        Implement free in-store signage and custom social media campaigns to promote your new program.
                                     </p>
                                 </div>
                             </div>
@@ -156,12 +156,22 @@ export default function StorePage() {
                 </div>
             </section>
 
-            <section className='flex flex-col items-center justify-center gap-24 py-24 px-5'>
-                <h1 className='sm:text-4xl text-3xl font-semibold px-5'>What does working with Loyalty Exchange look like?</h1>
+            <section className='flex flex-col items-center justify-center gap-24 py-24 px-12'>
+                <h1 className='sm:text-4xl text-3xl font-semibold'>What does working with Loyalty Exchange look like?</h1>
 
                 <div className='max-w-[1600px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:gap-16 gap-12'>
                     <div className='flex flex-col items-start gap-2.5'>
                         <div className='bg-yellow-200 rounded-full p-3 mb-2'>
+                            <Coins size={32} color='black' />
+                        </div>
+                        <h2 className='md:text-2xl text-xl font-semibold'>Cost-Effective Solution</h2>
+                        <p className='md:text-lg text-base'>
+                            Our platform has no signup fee, and a low referral fee of 4% per transaction, ensuring you get a customer for every dollar spent.
+                        </p>
+                    </div>
+
+                    <div className='flex flex-col items-start gap-2.5'>
+                        <div className='bg-green-200 rounded-full p-3 mb-2'>
                             <TrendingUp size={32} color='black' />
                         </div>
                         <h2 className='md:text-2xl text-xl font-semibold'>Increased Customer Engagement</h2>
@@ -169,8 +179,9 @@ export default function StorePage() {
                             Engage your customers like never before with our intuitive loyalty program. Tailored rewards and incentives encourage repeat visits.
                         </p>
                     </div>
+
                     <div className='flex flex-col items-start gap-2.5'>
-                        <div className='bg-green-200 rounded-full p-3 mb-2'>
+                        <div className='bg-fuchsia-200 rounded-full p-3 mb-2'>
                             <FastForward size={32} color='black' />
                         </div>
                         <h2 className='md:text-2xl text-xl font-semibold'>Streamlined Operations</h2>
@@ -178,6 +189,7 @@ export default function StorePage() {
                             No need to integrate with your POS. Customers simply pay as usual, and our platform will automate the entire process.
                         </p>
                     </div>
+
                     <div className='flex flex-col items-start gap-2.5'>
                         <div className='bg-blue-200 rounded-full p-3 mb-2'>
                             <MonitorSmartphone size={32} color='black' />
@@ -187,15 +199,7 @@ export default function StorePage() {
                             With no physical cards, our platform offers a seamless experience for both you and your customers.
                         </p>
                     </div>
-                    <div className='flex flex-col items-start gap-2.5'>
-                        <div className='bg-fuchsia-200 rounded-full p-3 mb-2'>
-                            <Coins size={32} color='black' />
-                        </div>
-                        <h2 className='md:text-2xl text-xl font-semibold'>Cost-Effective Solution</h2>
-                        <p className='md:text-lg text-base'>
-                            Accessing our network is completely free, and our referral-based pricing pricing policy ensures you get a customer for every dollar spent.
-                        </p>
-                    </div>
+                    
                     <div className='flex flex-col items-start gap-2.5'>
                         <div className='bg-amber-200 rounded-full p-3 mb-2'>
                             <Handshake size={32} color='black' />
@@ -205,6 +209,7 @@ export default function StorePage() {
                             Onboarding is easy. Simply tell us you are interested, and we will handle everything for you.
                         </p>
                     </div>
+
                     <div className='flex flex-col items-start gap-2.5'>
                         <div className='bg-lime-200 rounded-full p-3 mb-2'>
                             <HandCoins size={32} color='black' />
@@ -219,10 +224,10 @@ export default function StorePage() {
 
             <ImageBanner />
 
-            <section className='flex flex-col items-center justify-center bg-neutral-50 px-5 py-12 gap-12 md:gap-24'>
+            <section className='flex flex-col items-center justify-center bg-neutral-50 px-5 py-12 gap-12'>
                 <h1 className='sm:text-4xl text-3xl font-semibold'>Why choose us?</h1>
 
-                <p className='max-w-[640px] md:text-lg text-base'>
+                <p className='max-w-[640px] text-xl mb-12'>
                     Not just any loyalty app. We are a digitalised service, here to help you grow.
                     <br/><br/>
                     No matter what your business, you can access our network of <b>loyal customers</b> through our <b>comprehensive</b> and <b>intuitive</b> platform.
