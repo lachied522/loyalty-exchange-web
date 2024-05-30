@@ -3,6 +3,8 @@ import { getBasiqServerAccessToken } from "./server";
 export async function createBasiqUser(
     email: string,
     mobile: string,
+    firstName?: string,
+    lastName?: string,
     serverAccessToken?: string,
 ): Promise<string> {
     // see https://api.basiq.io/reference/createuser
@@ -19,7 +21,12 @@ export async function createBasiqUser(
                 'Content-Type': 'application/json', 
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ email, mobile }),
+            body: JSON.stringify({
+                email,
+                mobile,
+                firstName,
+                lastName
+            }),
         }
     );
 

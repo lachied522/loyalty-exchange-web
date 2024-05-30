@@ -1,5 +1,5 @@
 import { getBasiqServerAccessToken } from "./server";
-import { fetchAccountsByUserID } from "./accounts";
+import { fetchBasiqAccountsByUserID } from "./accounts";
 
 import type { Transaction } from "@/types/basiq";
 
@@ -51,7 +51,7 @@ export async function fetchTransactionsByUserID(
     }
 
     // fetch user accounts
-    const accounts = await fetchAccountsByUserID(BasiqUserID, serverAccessToken);
+    const accounts = await fetchBasiqAccountsByUserID(BasiqUserID, serverAccessToken);
 
     // initialise promises array
     const promises = [];

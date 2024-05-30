@@ -2,7 +2,7 @@ import { getBasiqServerAccessToken } from "./server";
 
 import type { Account } from "@/types/basiq";
 
-export async function fetchAccountsByUserID(
+export async function fetchBasiqAccountsByUserID(
     BasiqUserID: string | null,
     serverAccessToken?: string,
 ): Promise<Account[]> {

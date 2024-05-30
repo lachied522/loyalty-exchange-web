@@ -3,7 +3,7 @@ import { kv } from '@vercel/kv';
 
 import { createClient } from '@/utils/supabase/server';
 
-import { isRequestAuthenticated } from '@/api/auth';
+import { getAuthenticatedUser } from '@/api/auth';
 import { createRefreshConnectionsJob } from '@/utils/functions/jobs';
 import { fetchBasiqJobByJobID, fetchBasiqJobsByUserID } from '@/utils/basiq/jobs';
 import { getBasiqServerAccessToken } from '@/utils/basiq/server';
@@ -55,9 +55,9 @@ export async function GET(
         return Response.json({}, { status: 429 });
     }
 
-    const isAuthenticated = isRequestAuthenticated(params.userID);
+    const user = await getAuthenticatedUser(params.userID);
 
-    if (!isAuthenticated) {
+    if (!user) {
         return Response.json({} , { status: 401 });
     }
 
@@ -76,7 +76,11 @@ export async function GET(
         const now = new Date();
         const lastJobCreated = allJobs? new Date(allJobs[0].updated): new Date(0);
         
-        if (!allJobs || now.getTime() - lastJobCreated.getTime() > CREATE_NEW_REFRESH_JOB_LIMIT) {
+        if (
+            !allJobs ||
+            !allJobs.length ||
+            now.getTime() - lastJobCreated.getTime() > CREATE_NEW_REFRESH_JOB_LIMIT
+        ) {
             // 3i. create a new refresh job
             const newJob = await createRefreshConnectionsJob(params.userID, supabase, serverAccessToken);
 

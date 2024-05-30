@@ -1,4 +1,4 @@
-import { isRequestAuthenticated } from '@/api/auth';
+import { getAuthenticatedUser } from '@/api/auth';
 import { fetchAllUserData } from '@/utils/crud/users';
 import { createClient } from '@/utils/supabase/server';
 
@@ -6,15 +6,14 @@ export async function GET(
     req: Request,
     { params }: { params: { userID: string } }
 ) {
-    const isAuthenticated = await isRequestAuthenticated(params.userID);
+    const user = await getAuthenticatedUser(params.userID);
 
-    if (!isAuthenticated) {
+    if (!user) {
         return Response.json({} , { status: 401 })
     }
-
-    const supabase = createClient();
-
+    
     try {
+        const supabase = createClient();
         const data = await fetchAllUserData(params.userID, supabase);
 
         return Response.json(data);

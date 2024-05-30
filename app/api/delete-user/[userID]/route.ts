@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 
-import { isRequestAuthenticated } from '@/api/auth';
+import { getAuthenticatedUser } from '@/api/auth';
 
 import { insertJobRecord } from '@/utils/crud/jobs';
 
@@ -8,9 +8,9 @@ export async function GET(
     req: Request,
     { params }: { params: { userID: string } }
 ) {
-    const isAuthenticated = await isRequestAuthenticated(params.userID);
+    const user = await getAuthenticatedUser(params.userID);
 
-    if (!isAuthenticated) {
+    if (!user) {
         return Response.json({} , { status: 401 })
     }
 
@@ -34,13 +34,13 @@ export async function GET(
         });
 
         if (authError) {
-            console.log({ authError });
+            console.error({ authError });
             return Response.json({}, { status: authError.status });
         }
 
         return Response.json({} ,{ status: 200 });
     } catch (error: any) {
-        console.log('Error deleting user: ', error);
+        console.error('Error deleting user: ', error);
         return Response.json({}, { status: 500 });
     }
 }

@@ -24,8 +24,7 @@ export async function fetchBasiqJobByJobID(
     );
 
     if (!res.ok) {
-        console.error('error retrieving job, status: ', res.status);
-        return null;
+        throw new Error(`error retrieving job, status: ${res.status}`);
     }
 
     return await res.json();
@@ -53,8 +52,7 @@ export async function fetchBasiqJobsByUserID(
     );
 
     if (!res.ok) {
-        console.error('error retrieving job, status: ', res.status);
-        return null;
+        throw new Error(`error retrieving job, status: ${res.status}`);
     }
 
     // sort data by created

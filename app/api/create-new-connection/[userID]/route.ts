@@ -1,28 +1,19 @@
+// this route will be merged with manage-user-connections
 import { createClient } from '@/utils/supabase/server';
-import { createBasiqUser, getClientTokenBoundToUser } from '@/utils/basiq/users';
 
-import { headers } from 'next/headers';
+import { getAuthenticatedUser } from '@/api/auth';
+
+import { createBasiqUser, getClientTokenBoundToUser } from '@/utils/basiq/users';
 
 export async function GET(
     req: Request,
     { params }: { params: { userID: string } }
 ) {
     // create a new Basiq access token and bind it to the user
-    const headersList = headers();
-    const token = headersList.get('token');
+    const user = await getAuthenticatedUser(params.userID);
 
-    if (!token) {
-        return Response.json({} , { status: 401 });
-    }
-
-    const supabase = createClient();
-
-    // get user from token
-    const { data: { user } } = await supabase.auth.getUser(token);
-
-    // check that userID belongs to user with token
-    if (!(user && params.userID === user.id)) {
-        return Response.json({} , { status: 401 });
+    if (!user) {
+        return Response.json({} , { status: 401 })
     }
 
     if (!(user.email && user.user_metadata.mobile)) {
@@ -30,20 +21,48 @@ export async function GET(
     }
 
     try {
-        // step 1: create Basiq user
-        const BasiqUserID = await createBasiqUser(user.email, user.user_metadata.mobile);
+        // step 0: check if user already has a basiq
+        const supabase = createClient();
+        const { data, error: fetchError } = await supabase
+        .from('users')
+        .select('basiq_user_id')
+        .eq('id', params.userID);
 
+        if (fetchError) throw fetchError;
+
+        if (!(data && data.length)) {
+            // this should never happen as it would be caught above
+            throw new Error('User record not found.');
+        }
+
+        let BasiqUserID = data[0].basiq_user_id;
+        if (!BasiqUserID) {
+            // step 1: create Basiq user
+            BasiqUserID = await createBasiqUser(
+                user.email,
+                user.user_metadata.mobile,
+                user.user_metadata.first_name || '',
+                user.user_metadata.last_name || ''
+            );
+        }
+        
         // step 2: get client access token bounded to user
         const clientTokenBountToUser = await getClientTokenBoundToUser(BasiqUserID);
+        if (clientTokenBountToUser || clientTokenBountToUser.length) {
+            // something went wrong creating the client token
+            return Response.json({}, { status: 500 });
+        }
 
-        // step 3: store access token in Supabase
-        const { error: commitError } = await supabase
-        .from('users')
-        .update({ 'basiq_user_id': BasiqUserID })
-        .eq('id', user.id);
+        if (!data[0].basiq_user_id) {
+            // step 3: store access token in Supabase
+            const { error: commitError } = await supabase
+            .from('users')
+            .update({ 'basiq_user_id': BasiqUserID })
+            .eq('id', user.id);
 
-        if (commitError) {
-            return Response.json({ error: commitError }, { status: 500 });
+            if (commitError) {
+                return Response.json({ error: commitError }, { status: 500 });
+            }
         }
 
         // return url for Consent UI

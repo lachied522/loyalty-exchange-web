@@ -12,8 +12,7 @@ async function getUser(token: string | null) {
     return await supabase.auth.getUser();
 }
 
-
-export async function isRequestAuthenticated(userID: string) {
+export async function getAuthenticatedUser(userID: string) {
     // authenticate an api request
     // request can come from mobile or web
     // if mobile, token is passed as header
@@ -25,8 +24,8 @@ export async function isRequestAuthenticated(userID: string) {
 
     // check if authenticated user is same the one making the request
     if (user && userID === user.id) {
-        return true;
+        return user;
     }
 
-    return false;
+    return null;
 }
