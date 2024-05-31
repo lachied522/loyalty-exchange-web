@@ -16,7 +16,7 @@ export async function GET(
         return Response.json({} , { status: 401 })
     }
 
-    if (!(user.email && user.user_metadata.mobile)) {
+    if (!(user.email || user.user_metadata.mobile)) {
         return Response.json({ error: 'User does not have valid email or mobile' }, { status: 400 })
     }
 
@@ -38,12 +38,12 @@ export async function GET(
         let BasiqUserID = data[0].basiq_user_id;
         if (!BasiqUserID) {
             // step 1: create Basiq user
-            BasiqUserID = await createBasiqUser(
-                user.email,
-                user.user_metadata.mobile,
-                user.user_metadata.first_name || '',
-                user.user_metadata.last_name || ''
-            );
+            BasiqUserID = await createBasiqUser({
+                email: user.email,
+                mobile: user.user_metadata.mobile,
+                firstName: user.user_metadata.first_name || '',
+                lastName: user.user_metadata.last_name || ''
+            });
         }
         
         // step 2: get client access token bounded to user

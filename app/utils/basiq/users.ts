@@ -1,11 +1,27 @@
 import { getBasiqServerAccessToken } from "./server";
 
+// at least one of email or mobile is required
+type BasiqUserDetails = (
+    {
+        email: string
+        mobile?: string
+    } | {
+        email?: string
+        mobile: string
+    }
+) & {
+    firstName?: string
+    lastName?: string
+}
+
 export async function createBasiqUser(
-    email: string,
-    mobile: string,
-    firstName?: string,
-    lastName?: string,
-    serverAccessToken?: string,
+    {
+        email,
+        mobile,
+        firstName,
+        lastName,
+    }: BasiqUserDetails,
+    serverAccessToken?: string
 ): Promise<string> {
     // see https://api.basiq.io/reference/createuser
     if (!serverAccessToken) {
