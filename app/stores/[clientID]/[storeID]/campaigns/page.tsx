@@ -1,21 +1,21 @@
 import Canvas from "./components/canvas";
-import SocialMediaSelector from "./components/social-media-selector";
+import Editor from "./components/editor";
 
 export default function CampaignsPage() {
 
-
     return (
-        <div className='flex flex-col items-stretch justify-center md:p-6 p-2'>
-            <div className='text-xl font-semibold'>Campaigns</div>
-            <p>
-                Create a social media campaign for your rewards program in seconds.
-            </p>
+        <div className='flex flex-col items-stretch justify-center md:p-6 p-2 gap-6'>
+            <div>
+                <div className='text-xl font-semibold'>Campaigns</div>
+                <p>
+                    Create a social media campaign for your rewards program in seconds.
+                </p>
+            </div>
 
-
-            <div className='flex flex-col items-center justify-center p-12 gap-12'>
-                <SocialMediaSelector />
-
+            <div className='grid lg:grid-cols-[minmax(360px,1fr)_1fr] gap-6 p-6'>
                 <Canvas />
+
+                <Editor />
             </div>
         </div>
     )

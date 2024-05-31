@@ -17,19 +17,19 @@ function createEmptyDateMap() {
     for (let i = 0; i < 12; i++) {
         dateMap[date.getTime()] = { amount: 0, count: 0};
         date.setMonth(date.getMonth() - 1);
-      }
+    }
     
     return dateMap;
 }
 
-const domain = () => {
+const getXAxisDomain = () => {
     // want domain to be last 12 months
-    const lastYear = new Date();
-    lastYear.setFullYear(lastYear.getFullYear() - 1);
     const now = new Date();
+    const domainStart = new Date();
+    domainStart.setFullYear(now.getFullYear() - 1);
 
     return [
-        lastYear.getTime(),
+        domainStart.getTime(),
         now.getTime()
     ]
 }
@@ -46,7 +46,7 @@ export default function RevenueChart() {
 
     useEffect(() => {
         const handleResize = () => {
-            setHeight(window.innerWidth > 1024? 440: 240);
+            setHeight(window.innerWidth > 1024? 540: 320);
         };
 
         handleResize();
@@ -92,8 +92,6 @@ export default function RevenueChart() {
             {data.length ? (
             <ResponsiveContainer height={height} width='100%'>
                 <ComposedChart
-                    width={500}
-                    height={300}
                     data={data}
                     margin={{
                         top: 0,
@@ -107,7 +105,7 @@ export default function RevenueChart() {
                         type="number"
                         scale="time"
                         dataKey="timestamp"
-                        domain={domain()}
+                        domain={getXAxisDomain()}
                         tickFormatter={(timestamp: string) => formatXAxis(timestamp)}
                         tickCount={11}
                         minTickGap={31}
@@ -116,28 +114,30 @@ export default function RevenueChart() {
                     <YAxis
                         yAxisId="left"
                         tickFormatter={(amount: number) => formatCurrency(amount)}
+                        domain={[0, 'dataMax + 100']}
                     />
                     <YAxis
                         yAxisId="right"
                         orientation="right"
                         allowDecimals={false}
+                        domain={[0, 'dataMax + 10']}
                     />
                     <Legend />
-                    <Line 
-                        name="Customer Transactions"
-                        yAxisId="left"
-                        type="monotone"
-                        dataKey="amount"
-                        stroke="rgb(74 222 128)"
-                        isAnimationActive={false}
-                    />
-                    <Bar 
+                    <Bar
                         name="Rewards Redeemed"
                         yAxisId="right"
                         type="monotone"
                         dataKey="count"
                         stroke="#FECC15"
                         fill="#FECC15"
+                        isAnimationActive={false}
+                    />
+                    <Line
+                        name="Customer Transactions"
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="amount"
+                        stroke="rgb(34 197 94)"
                         isAnimationActive={false}
                     />
                 </ComposedChart>

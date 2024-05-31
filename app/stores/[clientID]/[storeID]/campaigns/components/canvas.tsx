@@ -1,11 +1,11 @@
 "use client";
+import { Raleway } from "next/font/google";
 import { useRef, useState, useEffect } from 'react';
 import NextImage from 'next/image';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-
 import { type CampaignsState, useCampaignsContext } from '../context/CampaignsContext';
+
+const raleway = Raleway({ subsets: ["latin"] });
 
 const SOCIAL_MEDIA_TEMPLATE_MAP = {
     'instagram': {
@@ -14,7 +14,7 @@ const SOCIAL_MEDIA_TEMPLATE_MAP = {
         height: 1080,
         text: {
             relativeX: 0.5, // relative x-coord for text position
-            relativeY: 0.3, // relative y-coord for text position
+            relativeY: 0.33, // relative y-coord for text position
         }
     },
     'facebook': {
@@ -23,7 +23,7 @@ const SOCIAL_MEDIA_TEMPLATE_MAP = {
         height: 788,
         text: {
             relativeX: 0.5,
-            relativeY: 0.3,
+            relativeY: 0.33,
         }
     },
     'twitter': {
@@ -32,7 +32,7 @@ const SOCIAL_MEDIA_TEMPLATE_MAP = {
         height: 1920,
         text: {
             relativeX: 0.5,
-            relativeY: 0.33,
+            relativeY: 0.35,
         }
     },
     'story': {
@@ -41,7 +41,7 @@ const SOCIAL_MEDIA_TEMPLATE_MAP = {
         height: 1920,
         text: {
             relativeX: 0.5,
-            relativeY: 0.33,
+            relativeY: 0.35,
         }
     },
 }
@@ -53,15 +53,15 @@ function fillTextWithWrap(
     y: number,
     maxWidth: number,
     lineHeight: number,
-    fontSize: number,
+    font?: string,
 ) {
-    fontSize = Math.round(fontSize);
-    ctx.font = `bold ${fontSize}px Serif`;
+    ctx.font = font || `bold 20px Serif`;
     ctx.fillStyle = 'black';
     ctx.textAlign ='center';
     ctx.textBaseline = 'middle';
 
     const words = text.split(' ');
+    const lines: string[] = [];
     let line: string = '';
     let word: string = '';
     for (let i=0; i<words.length; i++) {
@@ -70,19 +70,26 @@ function fillTextWithWrap(
         if (ctx.measureText(line + word).width < maxWidth) {
             line += word + ' ';
         } else {
-            ctx.fillText(line, x, y);
-            y += lineHeight;
+            lines.push(line);
             line = word + ' ';
         }
     }
-    ctx.fillText(line, x, y);
+    lines.push(line);
+
+    // move starting y coord up by half of lineheight for each line
+    y = y - ((lines.length - 1) * lineHeight / 2)
+    for (let i=0; i<lines.length; i++) {
+        ctx.fillText(lines[i], x, y);
+        y += lineHeight;
+    }
 }
 
 function populateCanvas(
     canvas: HTMLCanvasElement,
     image: HTMLImageElement,
+    title: string,
     text: string,
-    relativeX: number, 
+    relativeX: number,
     relativeY: number,
 ) {
     const ctx = canvas.getContext('2d');
@@ -94,21 +101,31 @@ function populateCanvas(
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
         ctx.drawImage(image, 0, 0, canvasWidth, canvasHeight);
+
+        fillTextWithWrap(
+            ctx,
+            title,
+            canvasWidth * relativeX,
+            canvasHeight * relativeY - canvasWidth * 0.24,
+            canvasWidth * 0.90, // max width is canvas width less a 5% buffer on each side
+            canvasWidth * 0.12, // TO DO: handle text size better
+            `bold ${Math.round(canvasWidth * 0.10)}px ${raleway.style.fontFamily}`,
+        );
         
         fillTextWithWrap(
             ctx,
             text,
             canvasWidth * relativeX,
             canvasHeight * relativeY,
-            canvasWidth * 0.90, // max width is canvas width less a 10px buffer
-            canvasHeight * 0.06,
-            canvasHeight * 0.05,
+            canvasWidth * 0.90, // max width is canvas width less a 5% buffer on each side
+            canvasWidth * 0.07, // TO DO: handle text size better
+            `bold ${Math.round(canvasWidth * 0.06)}px ${raleway.style.fontFamily}`,
         );
     }
 }
 
 export default function Canvas() {
-    const { selectedSocial } = useCampaignsContext() as CampaignsState;
+    const { canvasRef, selectedSocial, title, text } = useCampaignsContext() as CampaignsState;
     const [imageProps, setImageProps] = useState<{
         path: string,
         width: number,
@@ -118,12 +135,9 @@ export default function Canvas() {
             relativeY: number,
         }
     }>(SOCIAL_MEDIA_TEMPLATE_MAP['instagram']);
-    const [text, setText] = useState<string>('Our rewards are here! Download now.');
     const imageRef = useRef<HTMLImageElement>(null);
-    const downloadCanvasRef = useRef<HTMLCanvasElement>(null); // full-size canvas to download in high res
-    const displayCanvasRef = useRef<HTMLCanvasElement>(null); // canvas to display on screen
-  
-    const drawImage = (canvasRef: React.RefObject<HTMLCanvasElement>) => {
+    
+    const drawImage = () => {
         const canvas = canvasRef.current;
         const imageSrc = imageRef.current?.src;
 
@@ -133,6 +147,7 @@ export default function Canvas() {
                 populateCanvas(
                     canvas,
                     image,
+                    title,
                     text,
                     imageProps.text.relativeX,
                     imageProps.text.relativeY,
@@ -144,58 +159,22 @@ export default function Canvas() {
     }
 
     useEffect(() => {
-        setImageProps(SOCIAL_MEDIA_TEMPLATE_MAP[selectedSocial]);
         // Redraw canvas when image changes
-        drawImage(displayCanvasRef);
-        drawImage(downloadCanvasRef);
+        setImageProps(SOCIAL_MEDIA_TEMPLATE_MAP[selectedSocial]);
+        drawImage();
     }, [selectedSocial, setImageProps, drawImage]);
-  
-    const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setText(event.target.value);
-        // Redraw canvas when text changes
-        drawImage(displayCanvasRef);
-        drawImage(downloadCanvasRef);
-    };
-  
-    const downloadImage = () => {
-        const canvas = downloadCanvasRef.current;
-        if (canvas) {
-            const image = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = image;
-            link.download = 'my-campaign.png';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    };
 
     return (
         <>
-            <div className='flex flex-col gap-2'>
+            <div className='grid place-items-center' style={{ height: 360, width: '100%' }}>
                 <canvas
-                    ref={displayCanvasRef}
-                    width={360}
-                    height={SOCIAL_MEDIA_TEMPLATE_MAP[selectedSocial].height * 360 / SOCIAL_MEDIA_TEMPLATE_MAP[selectedSocial].width}
+                    ref={canvasRef}
+                    width={SOCIAL_MEDIA_TEMPLATE_MAP[selectedSocial].width}
+                    height={SOCIAL_MEDIA_TEMPLATE_MAP[selectedSocial].height}
                     className='border border-neutral-200'
+                    style={{ height: 360, maxWidth: 360 }}
                 />
-
-                <Input
-                    type="text"
-                    placeholder='Our rewards are here! Download now.'
-                    maxLength={64}
-                    value={text}
-                    onChange={handleTextChange}
-                />
-                <Button onClick={downloadImage}>Download</Button>
             </div>
-            
-            <canvas
-                ref={downloadCanvasRef}
-                width={SOCIAL_MEDIA_TEMPLATE_MAP[selectedSocial].width}
-                height={SOCIAL_MEDIA_TEMPLATE_MAP[selectedSocial].height}
-                className='hidden'
-            />
 
             <NextImage
                 ref={imageRef}

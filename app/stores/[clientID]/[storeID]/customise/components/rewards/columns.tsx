@@ -13,18 +13,18 @@ export const columns: ColumnDef<Reward>[] = [
   },
   {
     accessorKey: "cost",
-    header: "Points",
+    header: "Cost ($)",
   },
   {
-    header: "Edit",
+    accessorKey: 'id',
+    header: ({ column }) => (
+      <div className='text-end'>Actions</div>
+    ),
     cell: ({ row }) => (
-      <RewardDialog rewardData={row.original} />
+      <div className='flex flex-row justify-end gap-6'>
+        <RewardDialog rewardData={row.original} />
+        <DeleteRewardDialog rewardID={row.original.id} />
+      </div>
     )
   },
-  {
-    header: 'Delete',
-    cell: ({ row }) => (
-      <DeleteRewardDialog rewardID={row.original.id} />
-    )
-  }
 ]

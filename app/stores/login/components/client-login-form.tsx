@@ -28,16 +28,20 @@ async function convertUserToClient(
 ) {
     // if an existing user tries to signup as a client it will result in an error
     // must manually update user metadata and insert client record
-    const { error: insertError } = await supabase
-    .from('clients')
-    .insert({
-        id: user.id,
-        email: user.email,
-        name: user.user_metadata['first_name'] || 'Client'
-    });
-
-    if (insertError) {
-        throw new Error('Something went wrong. Please try again later.');
+    try {
+        await supabase
+        .from('clients')
+        .upsert({
+            id: user.id,
+            email: user.email,
+            name: user.user_metadata['first_name'] || 'Client'
+        }, {
+            onConflict: 'id',
+            ignoreDuplicates: false
+        })
+        .throwOnError();
+    } catch (error) {
+        console.error({error});
     }
 
     await supabase.auth.updateUser({
@@ -55,7 +59,7 @@ async function clientLogin(
         email,
         password
     });
-
+    
     if (authError) {
         throw authError;
     }

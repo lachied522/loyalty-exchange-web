@@ -1,15 +1,23 @@
 "use client";
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 
 import { type StoreIDState, useStoreIDContext } from "../../context/StoreIDContext";
-import { type ClientIDState, useClientIDContext } from "../../../context/ClientIDContext";
 
+import type { Tables } from "@/types/supabase";
 
 type SocialMedia = 'instagram'|'facebook'|'twitter'|'story'
 
 export type CampaignsState = {
+    canvasRef: React.RefObject<HTMLCanvasElement>
     selectedSocial: SocialMedia
+    selectedTemplate: string
+    title: string
+    text: string
     setSelectedSocial: React.Dispatch<React.SetStateAction<SocialMedia>>
+    setSelectedTemplate: React.Dispatch<React.SetStateAction<string>>
+    setTitle: React.Dispatch<React.SetStateAction<string>>
+    setText: React.Dispatch<React.SetStateAction<string>>
+    downloadImage: () => void
 }
 
 const CampaignsContext = createContext<any>(null);
@@ -25,13 +33,49 @@ interface CampaignsContextProviderProps {
 export default function CampaignsContextProvider({ children }: CampaignsContextProviderProps) {
     const { storeData } = useStoreIDContext() as StoreIDState;
     const [selectedSocial, setSelectedSocial] = useState<SocialMedia>('instagram');
+    const [selectedTemplate, setSelectedTemplate] = useState<string>('custom');
+    const [title, setTitle] = useState<string>('Rewards');
+    const [text, setText] = useState<string>('Our rewards are here! Download now.');
+    const canvasRef = useRef<HTMLCanvasElement>(null); // canvas to display on screen
+  
+    const downloadImage = () => {
+        const canvas = canvasRef.current;
+        if (canvas){
+            const image = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = 'my-campaign.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
 
-    
+    useEffect(() => {
+        // update text when selected reward changes
+        let _text = 'Our rewards are here! Download now.';
+        if (selectedTemplate !== 'custom') {
+            const reward = storeData.rewards.find((obj) => obj.id === selectedTemplate);
+            if (reward) {
+                _text = `Spend $${reward.cost} get ${reward.title}!`;
+            }
+        }
+        setText(_text);
+    }, [storeData.rewards, selectedTemplate, setText]);
+
     return (
         <CampaignsContext.Provider
             value={{
+                canvasRef,
                 selectedSocial,
-                setSelectedSocial
+                selectedTemplate,
+                title,
+                text,
+                setSelectedSocial,
+                setSelectedTemplate,
+                setTitle,
+                setText,
+                downloadImage
             }}
         >
             {children}
