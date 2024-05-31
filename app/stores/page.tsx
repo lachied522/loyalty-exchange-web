@@ -171,42 +171,12 @@ export default function StorePage() {
                     </div>
 
                     <div className='flex flex-col items-start gap-2.5'>
-                        <div className='bg-green-200 rounded-full p-3 mb-2'>
-                            <TrendingUp size={32} color='black' />
-                        </div>
-                        <h2 className='md:text-2xl text-xl font-semibold'>Increased Customer Engagement</h2>
-                        <p className='md:text-lg text-base'>
-                            Engage your customers like never before with our intuitive loyalty program. Tailored rewards and incentives encourage repeat visits.
-                        </p>
-                    </div>
-
-                    <div className='flex flex-col items-start gap-2.5'>
-                        <div className='bg-fuchsia-200 rounded-full p-3 mb-2'>
+                        <div className='bg-blue-200 rounded-full p-3 mb-2'>
                             <FastForward size={32} color='black' />
                         </div>
                         <h2 className='md:text-2xl text-xl font-semibold'>Streamlined Operations</h2>
                         <p className='md:text-lg text-base'>
-                            No need to integrate with your POS. Customers simply pay as usual, and our platform will automate the entire process.
-                        </p>
-                    </div>
-
-                    <div className='flex flex-col items-start gap-2.5'>
-                        <div className='bg-blue-200 rounded-full p-3 mb-2'>
-                            <MonitorSmartphone size={32} color='black' />
-                        </div>
-                        <h2 className='md:text-2xl text-xl font-semibold'>Digital Convenience</h2>
-                        <p className='md:text-lg text-base'>
-                            With no physical cards, our platform offers a seamless experience for both you and your customers.
-                        </p>
-                    </div>
-                    
-                    <div className='flex flex-col items-start gap-2.5'>
-                        <div className='bg-amber-200 rounded-full p-3 mb-2'>
-                            <Handshake size={32} color='black' />
-                        </div>
-                        <h2 className='md:text-2xl text-xl font-semibold'>Hassle-Free Setup</h2>
-                        <p className='md:text-lg text-base'>
-                            Onboarding is easy. Simply tell us you are interested, and we will handle everything for you.
+                            No need to integrate with your POS. No bar code scanning. Customers simply pay as usual, and our platform will automate the entire process.
                         </p>
                     </div>
 
