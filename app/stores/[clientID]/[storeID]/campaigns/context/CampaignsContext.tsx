@@ -12,11 +12,13 @@ export type CampaignsState = {
     selectedSocial: SocialMedia
     selectedTemplate: string
     title: string
-    text: string
+    body: string
+    isLoading: boolean
     setSelectedSocial: React.Dispatch<React.SetStateAction<SocialMedia>>
     setSelectedTemplate: React.Dispatch<React.SetStateAction<string>>
     setTitle: React.Dispatch<React.SetStateAction<string>>
-    setText: React.Dispatch<React.SetStateAction<string>>
+    setBody: React.Dispatch<React.SetStateAction<string>>
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
     downloadImage: () => void
 }
 
@@ -35,7 +37,8 @@ export default function CampaignsContextProvider({ children }: CampaignsContextP
     const [selectedSocial, setSelectedSocial] = useState<SocialMedia>('instagram');
     const [selectedTemplate, setSelectedTemplate] = useState<string>('custom');
     const [title, setTitle] = useState<string>('Rewards');
-    const [text, setText] = useState<string>('Our rewards are here! Download now.');
+    const [body, setBody] = useState<string>('Our rewards are here! Download now.');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const canvasRef = useRef<HTMLCanvasElement>(null); // canvas to display on screen
   
     const downloadImage = () => {
@@ -60,8 +63,8 @@ export default function CampaignsContextProvider({ children }: CampaignsContextP
                 _text = `Spend $${reward.cost} get ${reward.title}!`;
             }
         }
-        setText(_text);
-    }, [storeData.rewards, selectedTemplate, setText]);
+        setBody(_text);
+    }, [storeData.rewards, selectedTemplate, setBody]);
 
     return (
         <CampaignsContext.Provider
@@ -70,11 +73,13 @@ export default function CampaignsContextProvider({ children }: CampaignsContextP
                 selectedSocial,
                 selectedTemplate,
                 title,
-                text,
+                body,
+                isLoading,
                 setSelectedSocial,
                 setSelectedTemplate,
                 setTitle,
-                setText,
+                setBody,
+                setIsLoading,
                 downloadImage
             }}
         >

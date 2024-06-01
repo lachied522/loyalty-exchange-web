@@ -153,6 +153,7 @@ export type Database = {
       }
       rewards: {
         Row: {
+          conditions: string | null
           cost: number
           icon_name: string | null
           id: string
@@ -163,6 +164,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          conditions?: string | null
           cost?: number
           icon_name?: string | null
           id?: string
@@ -173,6 +175,7 @@ export type Database = {
           title: string
         }
         Update: {
+          conditions?: string | null
           cost?: number
           icon_name?: string | null
           id?: string
@@ -297,7 +300,7 @@ export type Database = {
         }
         Insert: {
           basiq_user_id?: string | null
-          id: string
+          id?: string
           last_updated?: string | null
           name?: string | null
           points_balance?: number
@@ -353,6 +356,25 @@ export type Database = {
           "": unknown
         }
         Returns: unknown
+      }
+      search_store_names: {
+        Args: {
+          query: string
+        }
+        Returns: {
+          address_line_1: string | null
+          city: string | null
+          client_id: string
+          created_at: string
+          id: string
+          name: string
+          points_rate: number
+          postcode: string | null
+          state: string | null
+          store_img_url: string | null
+          store_logo_url: string | null
+          vendor_name: string
+        }[]
       }
       search_vendor_names: {
         Args: {

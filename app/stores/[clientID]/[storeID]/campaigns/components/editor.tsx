@@ -10,7 +10,7 @@ import { ArrowDownToLine } from "lucide-react";
 
 
 export default function Editor() {
-    const { title, text, setTitle, setText, downloadImage } = useCampaignsContext() as CampaignsState;
+    const { title, body, setTitle, setBody, downloadImage } = useCampaignsContext() as CampaignsState;
 
     return (
         <div className='flex flex-col gap-2'>
@@ -48,13 +48,13 @@ export default function Editor() {
                     type="text"
                     placeholder='Our rewards are here! Download now.'
                     maxLength={64}
-                    value={text}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setText(e.target.value)}
+                    value={body}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBody(e.target.value)}
                     className='max-w-[360px]'
                 />
             </div>
             
-            <div className='flex justify-end'>
+            <div className='flex justify-start'>
                 <Button onClick={downloadImage}>
                     <ArrowDownToLine size={16} className='mr-2' />
                     Download

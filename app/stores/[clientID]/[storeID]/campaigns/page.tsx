@@ -12,7 +12,7 @@ export default function CampaignsPage() {
                 </p>
             </div>
 
-            <div className='grid lg:grid-cols-[minmax(360px,1fr)_1fr] gap-6 p-6'>
+            <div className='grid xl:grid-cols-[minmax(360px,1fr)_1fr] gap-6 p-6'>
                 <Canvas />
 
                 <Editor />

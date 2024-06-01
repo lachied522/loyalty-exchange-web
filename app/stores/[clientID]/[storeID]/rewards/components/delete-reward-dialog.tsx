@@ -1,6 +1,8 @@
 "use client";
 import { useState, useRef } from "react";
 
+import { Trash } from "lucide-react";
+
 import {
     Dialog,
     DialogContent,
@@ -12,16 +14,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-import { Trash } from "lucide-react";
-
-import { type CustomiseState, useCustomiseContext } from "../../context/CustomiseContext";
+import { type StoreIDState, useStoreIDContext } from "../../context/StoreIDContext";
 
 interface DeleteRewardDialogProps {
     rewardID: string
 }
 
 export default function DeleteRewardDialog({ rewardID } : DeleteRewardDialogProps) {
-    const { deleteRewardRecordAndUpdateState } = useCustomiseContext() as CustomiseState;
+    const { deleteRewardRecordAndUpdateState } = useStoreIDContext() as StoreIDState;
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const closeRef = useRef<HTMLButtonElement | null>(null);
 
@@ -55,7 +55,7 @@ export default function DeleteRewardDialog({ rewardID } : DeleteRewardDialogProp
                 <DialogHeader>
                     <DialogTitle>Are you sure?</DialogTitle>
                     <DialogDescription>
-                        This will remove this reward from the app and prevent customers redeeming it.
+                        This will remove this reward from the app and prevent customers from redeeming it.
                     </DialogDescription>
                 </DialogHeader>
 

@@ -24,7 +24,7 @@ export default function TotalRevenue() {
 
     return (
         <div className='flex flex-col p-2'>
-            <div className='flex flex-row items-center justify-between gap-6 lg:px-12 mb-6'>
+            <div className='flex flex-row items-center justify-between gap-6 mb-6'>
                 <div className='flex flex-col items-start gap-2'>
                     <div className='text-xl font-semibold'>Your Revenue</div>
                 </div>

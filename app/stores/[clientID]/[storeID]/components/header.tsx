@@ -4,11 +4,13 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/logo";
 
-import { type StoreIDState, useStoreIDContext } from "../context/StoreIDContext";
+import { type ScreenState, useScreenContext } from "../context/ScreenContext";
+
 import Account from "./account";
 
 export default function Header() {
-    const { isMobile, setIsSidebarOpenOnMobile } = useStoreIDContext() as StoreIDState;
+    const { isMobile, setIsSidebarOpenOnMobile } = useScreenContext() as ScreenState;
+
 
     const onMenuClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();

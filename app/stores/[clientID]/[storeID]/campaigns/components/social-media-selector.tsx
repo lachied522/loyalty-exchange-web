@@ -7,13 +7,14 @@ import { cn } from "@/components/lib";
 import { type CampaignsState, useCampaignsContext } from "../context/CampaignsContext";
 
 export default function SocialMediaSelector() {
-    const { selectedSocial, setSelectedSocial } = useCampaignsContext() as CampaignsState;
+    const { selectedSocial, isLoading, setSelectedSocial } = useCampaignsContext() as CampaignsState;
 
     return (
         <div className='flex flex-row flex-wrap items-stretch md:items-center gap-2 p-6'>
             <Button
                 variant='outline'
                 onClick={() => setSelectedSocial('instagram')}
+                disabled={isLoading}
                 className={cn(
                     'flex flex-row gap-3.5',
                     selectedSocial === 'instagram' && 'bg-neutral-100'
@@ -31,6 +32,7 @@ export default function SocialMediaSelector() {
             <Button
                 variant='outline'
                 onClick={() => setSelectedSocial('facebook')}
+                disabled={isLoading}
                 className={cn(
                     'flex flex-row gap-3.5',
                     selectedSocial === 'facebook' && 'bg-neutral-100'
@@ -48,6 +50,7 @@ export default function SocialMediaSelector() {
             <Button
                 variant='outline'
                 onClick={() => setSelectedSocial('twitter')}
+                disabled={isLoading}
                 className={cn(
                     'flex flex-row gap-3.5',
                     selectedSocial === 'twitter' && 'bg-neutral-100'
@@ -65,6 +68,7 @@ export default function SocialMediaSelector() {
             <Button
                 variant='outline'
                 onClick={() => setSelectedSocial('story')}
+                disabled={isLoading}
                 className={cn(
                     'flex flex-row gap-3.5',
                     selectedSocial === 'story' && 'bg-neutral-100'
