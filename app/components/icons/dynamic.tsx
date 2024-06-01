@@ -9,7 +9,7 @@ interface IconProps extends LucideProps {
     name: string;
 }
 
-export const DynamicIcon = memo(
+const DynamicIcon = memo(
     ({ name, ...props }: IconProps) => {
         // see https://lucide.dev/guide/packages/lucide-react#nextjs-example
         const LucideIcon = dynamic(
@@ -22,3 +22,7 @@ export const DynamicIcon = memo(
         return <LucideIcon {...props} />;
     }
 );
+
+DynamicIcon.displayName = 'Icon';
+
+export default DynamicIcon;

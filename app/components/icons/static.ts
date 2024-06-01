@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
     Coffee,
     Beer,
@@ -46,7 +44,8 @@ import {
     LeafyGreen,
 } from 'lucide-react';
 
-export default {
+// assign name to object before exporting to prevent no-anonymous-default-export warning
+const Icons = {
     Coffee,
     Beer,
     Wine,
@@ -91,3 +90,4 @@ export default {
     Leaf,
     LeafyGreen
 }
+export default Icons;

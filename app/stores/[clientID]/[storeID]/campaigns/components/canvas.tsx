@@ -209,7 +209,7 @@ export default function Canvas() {
         setIsLoading(true);
         setTemplateProps(SOCIAL_MEDIA_TEMPLATE_MAP[selectedSocial]);
         drawImage();
-    }, [selectedSocial, setTemplateProps, drawImage]);
+    }, [selectedSocial, setIsLoading, setTemplateProps, drawImage]);
 
     return (
         <>

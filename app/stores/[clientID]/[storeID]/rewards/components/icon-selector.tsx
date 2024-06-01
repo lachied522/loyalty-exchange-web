@@ -34,8 +34,9 @@ export default function IconSelector({ value, onChange } : IconSelectorProps) {
             </PopoverTrigger>
             <PopoverContent>
                 <div className='grid grid-cols-4'>
-                    {Object.keys(Icons).map((name) => (
+                    {Object.keys(Icons).map((name, index) => (
                         <Button
+                            key={`icon-select-option-${index}`}
                             variant='ghost'
                             onClick={() => onChange(name)}
                         >

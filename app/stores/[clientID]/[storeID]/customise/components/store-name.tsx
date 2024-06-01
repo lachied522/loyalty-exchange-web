@@ -47,7 +47,7 @@ export default function StoreName() {
             name: storeData.name,
             vendor_name: storeData.vendor_name,
         });
-    }, [storeData.name, form]);
+    }, [form, storeData.name, storeData.vendor_name]);
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
