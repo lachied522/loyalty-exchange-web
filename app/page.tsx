@@ -12,7 +12,7 @@ export default function HomePage() {
   return (
       <main className=''>
         <section className='h-screen bg-yellow-100'>
-          <div className='w-full flex sm:flex-row flex-col justify-between py-4 px-6'>
+          <div className='w-full flex sm:flex-row flex-col justify-between p-6 gap-2'>
             <Logo withText={true} />
 
             <Link href='/stores' className='flex flex-row justify-end'>

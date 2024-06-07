@@ -33,6 +33,7 @@ export default function RootLayout({
             fbq('track', 'PageView');`}
           </Script>
           {/* <!-- End Meta Pixel Code --> */}
+          <meta name="apple-itunes-app" content="app-id=6502423729" />
       </head>
       <body className={raleway.className}>{children}</body>
     </html>

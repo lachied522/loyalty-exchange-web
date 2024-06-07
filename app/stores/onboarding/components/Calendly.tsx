@@ -24,7 +24,7 @@ export default function CalendlyInlineWidget() {
           'src',
           'https://assets.calendly.com/assets/external/widget.js'
         );
-        script.setAttribute(
+          script.setAttribute(
             'async',
             'true'
         )
