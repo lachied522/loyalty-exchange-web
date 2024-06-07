@@ -16,12 +16,22 @@ export default function StorePage() {
     return (
         <main className='scrollbar-custom'>
             <section className='bg-yellow-100 pb-24'>
-                <div className='w-full flex flex-row justify-between py-4 px-6'>
+                <div className='w-full flex flex-row justify-between p-6'>
                     <Logo withText={true} />
 
-                    <Link href='/' className='flex flex-row justify-end'>
-                        <Button variant='ghost' className='sm:text-lg font-medium hover:bg-yellow-200'>I am a customer</Button>
-                    </Link>
+                    <div className='flex flex-row gap-3.5'>
+                        <Link href='/' className='flex flex-row justify-end'>
+                            <Button variant='ghost' className='sm:text-lg font-medium hover:bg-yellow-200'>I am a customer</Button>
+                        </Link>
+
+                        <Link href='/stores/signup' className='flex flex-row justify-end'>
+                            <Button variant='ghost' className='sm:text-lg font-medium hover:bg-yellow-200'>Signup</Button>
+                        </Link>
+
+                        <Link href='/stores/login' className='flex flex-row justify-end'>
+                            <Button variant='default' className='sm:text-lg font-medium hover:bg-yellow-200'>Login</Button>
+                        </Link>
+                    </div>
                 </div>
 
                 <div className='h-[60vh] min-h-[540px] flex justify-center items-center sm:p-24 p-12'>

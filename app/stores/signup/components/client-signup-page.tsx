@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from '@/components/ui/input';
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 async function clientSignup({
     first_name,
@@ -70,8 +71,9 @@ const formSchema = z.object({
 });
 
 export default function ClientSignUpPage() {
-    const [email, setEmail] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [shouldRedirectToBooking, setShouldRedirectToBooking] = useState<boolean>(true);
+    const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const router = useRouter();
 
@@ -89,22 +91,25 @@ export default function ClientSignUpPage() {
 
     useEffect(() => {
         if (searchParams.get('email')) {
-            setEmail(searchParams.get('email'));
+            form.setValue('email', searchParams.get('email')!);
         }
-    }, [searchParams, setEmail]);
+
+        setRedirectUrl(searchParams.get('redirect'));
+    }, []);
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
 
         try {
             const clientID = await clientSignup(values);
-    
-            const redirectUrl = searchParams.get('redirect');
-            if (redirectUrl) {
+
+            if (shouldRedirectToBooking) {
+                router.replace(`/stores/onboarding?email=${values.email}`);
+            } else if (redirectUrl) {
                 router.replace(redirectUrl);
             } else {
                 // redirect to payments
-                router.replace(`/stores/${clientID}/payments`);
+                router.replace(`/stores/${clientID}/create-store`);
             }
         } catch (error: any) {
             form.setError('passwordConfirm', { message: error.message || 'Could not login. Please try again later.' });
@@ -150,9 +155,8 @@ export default function ClientSignUpPage() {
                         <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                                <Input {...field} disabled={!!email} />
+                                <Input {...field} />
                             </FormControl>
-                            {email && <FormDescription>We already have your email.</FormDescription>}
                             <FormMessage />
                         </FormItem>
                     )}
@@ -176,13 +180,13 @@ export default function ClientSignUpPage() {
                     control={form.control}
                     name="password"
                     render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                            <Input type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
+                        <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                                <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
                     )}
                 />
 
@@ -190,15 +194,31 @@ export default function ClientSignUpPage() {
                     control={form.control}
                     name="passwordConfirm"
                     render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                            <Input type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
+                        <FormItem>
+                            <FormLabel>Confirm Password</FormLabel>
+                            <FormControl>
+                                <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
                     )}
                 />
+
+                <FormItem className='grid grid-cols-[1fr_36px] gap-6 my-8'>
+                    <div className='flex flex-col gap-2'>
+                        <FormLabel className=''>
+                            I would like a complementary consultation with someone from Loyalty Exchange*
+                        </FormLabel>
+                        <FormDescription>
+                            *includes an introduction to the platform and how to get the most out of it for your business.
+                        </FormDescription>
+                    </div>
+
+                    <Switch
+                        checked={shouldRedirectToBooking}
+                        onCheckedChange={() => setShouldRedirectToBooking((curr) => !curr)}
+                    />
+                </FormItem>
 
                 <Button
                     type="submit"
@@ -210,7 +230,7 @@ export default function ClientSignUpPage() {
 
                 <div className='flex flex-row justify-between text-base mt-2'>
                     Already have an account?
-                    <Link href='/stores/login' className='text-blue-400 underline'>Login</Link>
+                    <Link href='/stores/login' className='text-blue-400 font-medium underline'>Login</Link>
                 </div>
             </form>
         </Form>

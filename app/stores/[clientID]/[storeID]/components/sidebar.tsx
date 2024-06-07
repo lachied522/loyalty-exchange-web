@@ -3,16 +3,15 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-import { Home, Cog, Store, Plus, Smartphone, Gift } from 'lucide-react';
+import { Home, Store, Smartphone, Gift } from 'lucide-react';
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/components/lib";
 
-import { createBillingPortalSession } from "../../actions/billing-portal";
-
 import { type ClientIDState, useClientIDContext } from "../../context/ClientIDContext";
 import { type ScreenState, useScreenContext } from "../context/ScreenContext";
+import BillingButton from "./billing-button";
 
 export default function Sidebar() {
     const { clientData } = useClientIDContext() as ClientIDState;
@@ -20,21 +19,6 @@ export default function Sidebar() {
     const [isLoadingPayments, setIsLoadingPayments] = useState<boolean>(false);
     const sidebarRef = useRef<HTMLDivElement | null>(null);
     const pathname = usePathname();
-
-    const onPaymentsButtonClick = async () => {
-        if (isLoadingPayments) return; // prevent multiple requests
-        setIsLoadingPayments(true);
-        // create billing portal session and open in new tab
-        const res = await createBillingPortalSession(clientData, pathname);
-
-        if (!(res && res.url)) {
-            // TO DO
-            return;
-        }
-
-        window.open(res.url, '_blank');
-        setIsLoadingPayments(false);
-    }
 
     useEffect(() => {
         const closeSidebarOnOutsideClick = (event: MouseEvent) => {
@@ -77,11 +61,11 @@ export default function Sidebar() {
                     isMobile && !isSidebarOpenOnMobile && 'translate-x-[-100%]',
                 )}
             >
-                
-
                 <nav className='h-full flex flex-col'>
-                    {clientData.stores.map((store) => (
-                        <div className='flex flex-col gap-2' key={`nav-item-${store.id}`}>
+                    {clientData.stores.map((store, index) => (
+                        <div key={`nav-item-${store.id}`} className='flex flex-col gap-2'>
+                            {index > 0 && <Separator className='my-3.5' />}
+
                             <h4 className='text-lg font-semibold mb-2'>{store.name}</h4>
 
                             <Link href={`/stores/${clientData.id}/${store.id}/dashboard`}>
@@ -135,7 +119,6 @@ export default function Sidebar() {
                                     <div className='font-semibold text-xs text-left'>Campaigns</div>
                                 </Button>
                             </Link>
-                            <Separator className='my-3.5' />
                         </div>
                     ))}
                     
@@ -150,17 +133,7 @@ export default function Sidebar() {
                     </Link>
                      */}
                     <div className='h-full flex flex-col justify-end'>
-                        <Button
-                            variant='ghost'
-                            className={cn(
-                                'w-full grid grid-cols-[25px,1fr] items-center justify-start hover:text-yellow-400 hover:bg-white',
-                                pathname.endsWith('/payments') && 'text-yellow-40 gap-10'
-                            )}
-                            onClick={onPaymentsButtonClick}
-                        >
-                            <Cog size={20} />
-                            <div className='font-semibold text-xs text-left'>Payments</div>
-                        </Button>
+                        <BillingButton clientData={clientData} pathname={pathname} />
                     </div>
                 </nav>
             </aside>

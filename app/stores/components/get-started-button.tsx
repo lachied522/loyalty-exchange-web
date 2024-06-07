@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ export default function GetStartedButton() {
                 className='w-[240px] h-[48px]'
             />
 
-            <Link href={`/stores/onboarding?email=${email}`}>
+            <Link href={`/stores/signup?email=${email}`}>
                 <Button size='lg' className='text-lg font-semibold'>
                     Start Now
                 </Button>

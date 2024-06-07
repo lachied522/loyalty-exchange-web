@@ -156,7 +156,7 @@ export default function ClientLoginForm() {
 
                 <div className='flex flex-row justify-between text-base mt-2'>
                     Don&apos;t have an account?
-                    <Link href='/stores/signup' className='text-blue-400 underline'>Signup</Link>
+                    <Link href='/stores/signup' className='text-blue-400 font-medium underline'>Signup</Link>
                 </div>
             </form>
         </Form>
