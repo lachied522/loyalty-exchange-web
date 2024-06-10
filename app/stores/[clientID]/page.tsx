@@ -5,7 +5,7 @@ import { type ClientIDState, useClientIDContext } from "./context/ClientIDContex
 
 export default function Page() {
     const { clientData } = useClientIDContext() as ClientIDState;
-
+    
     if (clientData.stores.length) {
         // redirect to dashboard
         redirect(`/stores/${clientData.id}/${clientData.stores[0].id}/dashboard`);

@@ -30,6 +30,11 @@ export type Action = {
     payload: {
         rewardID: string
     }
+} | {
+    type: 'RECOVER_REWARD',
+    payload: {
+        rewardID: string
+    }
 }
 
 export function ClientReducer(state: ClientData, action: Action) {

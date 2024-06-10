@@ -119,6 +119,18 @@ export default function StoreIDContextProvider({
         [supabase, dispatch]
     );
 
+    const recoverArchivedRewardAndUpdateState = useCallback(
+        async (rewardID: string) => {
+            await deleteReward(rewardID, supabase);
+
+            dispatch({
+                type: 'DELETE_REWARD',
+                payload: { rewardID },
+            })
+        },
+        [supabase, dispatch]
+    );
+
     const uploadImageFromFile = useCallback(
         async (file: File, bucket: 'stores'|'rewards'|'logos') => {
             const formData = new FormData();

@@ -14,9 +14,10 @@ import { renderStaticIcon } from "@/components/icons/helpers";
 interface IconSelectorProps {
     value: string | null
     onChange: (value: string) => void
+    isDisabled?: boolean
 }
 
-export default function IconSelector({ value, onChange } : IconSelectorProps) {
+export default function IconSelector({ value, onChange, isDisabled = false } : IconSelectorProps) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -25,6 +26,7 @@ export default function IconSelector({ value, onChange } : IconSelectorProps) {
                 <Button
                     variant="outline"
                     role="combobox"
+                    disabled={isDisabled}
                     aria-expanded={open}
                     className="flex items-center justify-start gap-2 px-5"
                 >

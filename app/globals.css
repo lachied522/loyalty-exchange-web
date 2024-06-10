@@ -79,3 +79,9 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(212 212 212);
 }
+
+/* Remove clock icon for time inputs */
+input[type="time"]::-webkit-calendar-picker-indicator {
+  background: none;
+  display:none;
+}

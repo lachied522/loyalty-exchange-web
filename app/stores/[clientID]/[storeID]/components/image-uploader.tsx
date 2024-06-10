@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-
 import Image from "next/image";
 
 interface ImageUploaderProps {
@@ -58,8 +57,7 @@ export default function ImageUploader({
                     width={0}
                     height={0}
                     sizes="(height: 240px)"
-                    objectFit='contain'
-                    style={{ height, width: 'auto', borderRadius: 12 }}
+                    style={{ height, width: 'auto', objectFit: 'cover', borderRadius: 12 }}
                 />
             </div>
             ) : (

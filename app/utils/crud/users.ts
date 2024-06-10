@@ -28,7 +28,8 @@ export async function fetchAllUserData(
     const { data, error } = await supabase
     .from('users')
     .select('*, points(*, stores(*, rewards(*))), redeemed(*, rewards(*)), transactions(*)')
-    .eq('id', userID);
+    .eq('id', userID)
+    .filter('points.stores.rewards.is_archived', 'eq', false);
 
     if (error) {
         console.error(`Error fecthing user data ${error.message}`);

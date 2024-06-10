@@ -40,8 +40,8 @@ async function convertUserToClient(
             ignoreDuplicates: false
         })
         .throwOnError();
-    } catch (error) {
-        console.error({error});
+    } catch (error: any) {
+        console.error(error.message);
     }
 
     await supabase.auth.updateUser({

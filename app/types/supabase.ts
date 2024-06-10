@@ -155,9 +155,11 @@ export type Database = {
         Row: {
           conditions: string | null
           cost: number
+          expires_at: string | null
           icon_name: string | null
           id: string
           image_url: string | null
+          is_archived: boolean
           promo_code: string | null
           reward_type: Database["public"]["Enums"]["reward_type"] | null
           store_id: string
@@ -166,9 +168,11 @@ export type Database = {
         Insert: {
           conditions?: string | null
           cost?: number
+          expires_at?: string | null
           icon_name?: string | null
           id?: string
           image_url?: string | null
+          is_archived?: boolean
           promo_code?: string | null
           reward_type?: Database["public"]["Enums"]["reward_type"] | null
           store_id: string
@@ -177,9 +181,11 @@ export type Database = {
         Update: {
           conditions?: string | null
           cost?: number
+          expires_at?: string | null
           icon_name?: string | null
           id?: string
           image_url?: string | null
+          is_archived?: boolean
           promo_code?: string | null
           reward_type?: Database["public"]["Enums"]["reward_type"] | null
           store_id?: string

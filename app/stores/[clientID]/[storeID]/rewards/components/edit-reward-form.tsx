@@ -5,6 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { format } from "date-fns";
+
+import { Trash } from "lucide-react";
+
 import {
   Form,
   FormControl,
@@ -48,7 +52,7 @@ interface EditRewardFormProps {
 }
 
 export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
-    const { updateRewardRecordAndUpdateState } = useStoreIDContext() as StoreIDState;
+    const { updateRewardRecordAndUpdateState, deleteRewardRecordAndUpdateState } = useStoreIDContext() as StoreIDState;
     const [imageFile, setImageFile] = useState<File | null>(null); // images must be stored in state before being uploaded
     const [isEdittingImage, setIsEdittingImage] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -56,6 +60,7 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: rewardData,
+        disabled: rewardData.is_archived,
     });
     const title = form.watch("title");
     const condtions = form.watch("conditions");
@@ -101,10 +106,49 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
         setIsEdittingImage(false);
         setIsLoading(false);
     }
+    
+    const onRecoverArchivedReward = async () => {
+        
+    }
+
+    const onDeleteArchivedReward = async () => {
+        await deleteRewardRecordAndUpdateState(rewardData.id);
+
+        // close modal
+        if (closeRef && closeRef.current) closeRef.current.click();
+    }
 
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
+                {rewardData.is_archived && (
+                <div className='flex flex-row justify-between py-6'>
+                    <p className='text-sm'>
+                        <span className='text-base font-medium'>This reward is archived.</span>
+                        <br/>
+                        You can recover it or delete it permanently.
+                    </p>
+                    
+                    <div className='flex flex-row gap-3.5'>
+                        <Button
+                            type='button' variant='secondary'
+                        >
+                            Recover
+                        </Button>
+                        
+                        <Button
+                            type='button'
+                            variant='destructive'
+                            onClick={onDeleteArchivedReward}
+                            className='flex items-center gap-1'
+                        >
+                            <Trash size={16} />
+                            Delete
+                        </Button>
+                    </div>
+                </div>
+                )}
+
                 <div className='max-h-[80vh] flex flex-col gap-6 p-2 space-y-8 overflow-auto'>
                     <div className='flex flex-col items-center p-6 gap-3.5'>
                         <div className='text-center text-xl font-medium'>
@@ -112,7 +156,7 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
                             {condtions? '*' : ''}
                         </div>
                         {condtions && <p>*{condtions}</p>}
-                    </div>
+                    </div>  
                     
                     <FormField
                         control={form.control}
@@ -127,7 +171,7 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
                                     <Input
                                         maxLength={32}
                                         placeholder="e.g. 1 Free Tea or Coffee"
-                                        {...field} 
+                                        {...field}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -148,8 +192,8 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
                                     <Input
                                         maxLength={32}
                                         placeholder="e.g. Orders above $50 only"
+                                        {...field}
                                         value={field.value || ''}
-                                        onChange={field.onChange}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -171,8 +215,8 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
                                         <Input
                                             maxLength={12}
                                             placeholder="My Promo Code"
+                                            {...field}
                                             value={field.value || ''}
-                                            onChange={field.onChange}
                                             className='min-h-[56px] max-w-[240px] text-2xl font-medium'
                                         />
                                     </FormControl>
@@ -181,7 +225,22 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
                                 </FormItem>
                             )}
                         />
-                        )}
+                    )}
+
+                    {rewardData.expires_at && (
+                        <FormItem>
+                            <FormLabel>Expiry Date</FormLabel>
+                            <FormDescription>
+                                Date and time this reward will expire.
+                            </FormDescription>
+                            <Input
+                                type="text"
+                                value={format(rewardData.expires_at, 'PPp')}
+                                disabled
+                                className='max-w-[240px]'
+                            />
+                        </FormItem>
+                    )}
 
                     <div className='flex flex-row justify-between gap-3.5'>
                         <FormField
@@ -199,7 +258,7 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
                                             min={0}
                                             placeholder="e.g. 50"
                                             className='max-w-[180px]'
-                                            {...field} 
+                                            {...field}
                                         />
                                     </FormControl>
                                     
@@ -213,18 +272,14 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
                             <FormDescription>
                                 This is the equivalent dollar amount customers must spend to redeem this reward.
                             </FormDescription>
-                            <FormControl>
-                                <Input
-                                    type="number"
-                                    placeholder="e.g. 50"
-                                    value={cost? (cost / 10).toFixed(2): ''}
-                                    min={0}
-                                    disabled
-                                    className='max-w-[180px]'
-                                />
-                            </FormControl>
-                            
-                            <FormMessage />
+                            <Input
+                                type="number"
+                                placeholder="e.g. 50"
+                                value={cost? (cost / 10).toFixed(2): ''}
+                                min={0}
+                                disabled
+                                className='max-w-[180px]'
+                            />                            
                         </FormItem>
                     </div>
                    
@@ -238,7 +293,11 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
                                     Give your reward some personality with an icon.
                                 </FormDescription>
                                 <FormControl>
-                                    <IconSelector value={field.value} onChange={(value: string) => field.onChange(value)} />
+                                    <IconSelector
+                                        value={field.value}
+                                        onChange={(value: string) => field.onChange(value)}
+                                        isDisabled={rewardData.is_archived}
+                                    />
                                 </FormControl>
                                 
                                 <FormMessage />
@@ -272,7 +331,7 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
                                     <Button
                                         type='button'
                                         variant='secondary'
-                                        disabled={!field.value}
+                                        disabled={rewardData.is_archived || !field.value}
                                         onClick={onEditImageClick}
                                     >
                                         Edit
@@ -296,14 +355,17 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
                         )}
                     />
 
+                    {!rewardData.is_archived && (
                     <div className='w-full flex flex-row items-center justify-between py-12'>
                         <p>Delete this reward</p>
 
                         <DeleteRewardDialog rewardID={rewardData.id} />
                     </div>
+                    )}
                 </div>
 
-                <div className='w-full flex flex-row items-center justify-between'>
+                {!rewardData.is_archived && (
+                <div className='w-full flex flex-row items-center justify-between p-2'>
                     <DialogClose asChild>
                         <Button
                             ref={closeRef}
@@ -333,6 +395,7 @@ export default function EditRewardForm({ rewardData } : EditRewardFormProps) {
                     </Button>
                     )}
                 </div>
+                )}
             </form>
         </Form>
     )

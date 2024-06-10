@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { DialogClose } from "@/components/ui/dialog";
 
 import { uploadImage } from "../../../actions/upload-image";
@@ -31,6 +32,7 @@ import { type StoreIDState, useStoreIDContext } from "../../context/StoreIDConte
 
 import ImageUploader from "../../components/image-uploader";
 import IconSelector from "./icon-selector";
+import DatePicker from "../../components/date-picker";
 
 const formSchema = z.object({
     title: z.string().min(2).max(32),
@@ -40,13 +42,18 @@ const formSchema = z.object({
     cost: z.coerce.number().min(0), // cost of reward in points - should probably change this to 'points' to avoid confusion
     icon_name: z.string().nullable(),
     image_url: z.string().nullable(),
+    expires_at: z.date().nullable(),
 })
 .refine((obj) => obj.reward_type!=='promo_code' || obj.promo_code?.length, {
     message: 'Required',
     path: ['promo_code']
 });
 
-export default function NewRewardForm() {
+interface NewRewardFormProps {
+    isLimitedTime?: boolean
+}
+
+export default function NewRewardForm({ isLimitedTime = false }: NewRewardFormProps) {
     const { updateRewardRecordAndUpdateState, insertRewardRecordAndUpdateState } = useStoreIDContext() as StoreIDState;
     const [imageFile, setImageFile] = useState<File | null>(null); // images must be stored in state before being uploaded
     const [isEdittingImage, setIsEdittingImage] = useState<boolean>(false);
@@ -57,20 +64,26 @@ export default function NewRewardForm() {
         defaultValues: {
             title: '1 Free Tea or Coffee',
             reward_type: 'free_item',
+            expires_at: isLimitedTime? new Date(): null,
+            promo_code: null,
             cost: 50,
             icon_name: 'PartyPopper',
         },
     });
     const title = form.watch("title");
     const condtions = form.watch("conditions");
-    const cost = form.watch("cost");
     const rewardType = form.watch("reward_type");
+    const expiresAt = form.watch("expires_at");
+    const cost = form.watch("cost");
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
 
         // insert new record and obtain new record id
-        const record = await insertRewardRecordAndUpdateState({ ...values });
+        const record = await insertRewardRecordAndUpdateState({
+            ...values,
+            expires_at: values.expires_at? values.expires_at.toISOString(): null,
+        });
 
         if (imageFile) {
             // upload image to storage
@@ -169,6 +182,41 @@ export default function NewRewardForm() {
                     />
 
                     <div className='grid grid-cols-2 gap-6'>
+                        <FormItem>
+                            <FormLabel>Limited time?</FormLabel>
+                            <FormDescription>
+                                Check this if your reward will be limited-time only.
+                            </FormDescription>
+                            <Switch
+                                checked={!!expiresAt}
+                                onCheckedChange={(checked) => form.setValue('expires_at', checked? new Date(): null)}
+                            />
+                        </FormItem>
+
+                        {expiresAt && (
+                        <FormField
+                            control={form.control}
+                            name="expires_at"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Expiry</FormLabel>
+                                    <FormDescription>
+                                        Set expiry date and time for this reward.
+                                    </FormDescription>
+                                    <FormControl>
+                                        <DatePicker
+                                            value={field.value!}
+                                            onChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        )}
+                    </div>
+
+                    <div className='grid grid-cols-2 gap-6'>
                         <FormField
                             control={form.control}
                             name="reward_type"
@@ -252,18 +300,14 @@ export default function NewRewardForm() {
                             <FormDescription>
                                 This is the equivalent dollar amount customers must spend to redeem this reward.
                             </FormDescription>
-                            <FormControl>
-                                <Input
-                                    type="number"
-                                    placeholder="e.g. 50"
-                                    value={cost? (cost / 10).toFixed(2): ''}
-                                    min={0}
-                                    disabled
-                                    className='max-w-[180px]'
-                                />
-                            </FormControl>
-                            
-                            <FormMessage />
+                            <Input
+                                type="number"
+                                placeholder="e.g. 50"
+                                value={cost? (cost / 10).toFixed(2): ''}
+                                min={0}
+                                disabled
+                                className='max-w-[180px]'
+                            />
                         </FormItem>
                     </div>
 
@@ -277,7 +321,10 @@ export default function NewRewardForm() {
                                     Give your reward some personality with an icon.
                                 </FormDescription>
                                 <FormControl>
-                                    <IconSelector value={field.value} onChange={(value: string) => field.onChange(value)} />
+                                    <IconSelector
+                                        value={field.value}
+                                        onChange={(value: string) => field.onChange(value)}
+                                    />
                                 </FormControl>
                                 
                                 <FormMessage />
@@ -361,6 +408,7 @@ export default function NewRewardForm() {
                     <Button
                         type="submit"
                         className="font-semibold"
+                        onClick={() => console.log(form.getValues(), form.formState.errors)}
                     >
                         Save
                     </Button>
